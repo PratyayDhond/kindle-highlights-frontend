@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Sparkles } from 'lucide-react';
@@ -31,9 +30,34 @@ const Index = () => {
       });
       return;
     }
-
     setProcessingState('processing');
-    
+
+    const formData = new FormData();
+formData.append('file', selectedFile); // Make sure 'file' matches the field expected by multer
+
+try {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user-highlights`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error("Upload failed");
+
+  const data = await response.json();
+  console.log("Server response:", data);
+
+  // Optional: Show toast or update UI
+} catch (error) {
+  console.error("Error uploading file:", error);
+  toast({
+    title: "Upload failed",
+    description: "There was an error processing your file. Please try again.",
+    variant: "destructive",
+  });
+  setProcessingState('idle');
+}
+
+
     // Simulate API call with processing time (35-60 seconds)
     const processingTime = Math.random() * 25000 + 35000; // 35-60 seconds
     
