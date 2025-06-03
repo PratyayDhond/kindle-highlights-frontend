@@ -12,7 +12,9 @@ const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState>('idle');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
   const { toast } = useToast();
+  const [jobId, setJobId] = useState<string | null>(null);
 
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
@@ -30,76 +32,105 @@ const Index = () => {
       });
       return;
     }
-    setProcessingState('processing');
+    setProgress(0);
 
+    // 1. Upload file and get jobId from backend
     const formData = new FormData();
-formData.append('file', selectedFile); // Make sure 'file' matches the field expected by multer
+    formData.append('file', selectedFile);
 
-try {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user-highlights`, {
-    method: 'POST',
-    body: formData,
-  });
-  if (!response.ok) throw new Error("Upload failed");
-
-  // Get the filename from the Content-Disposition header if available
-  const disposition = response.headers.get('Content-Disposition');
-  let filename = 'highlights.zip';
-  if (disposition && disposition.includes('filename=')) {
-    filename = disposition.split('filename=')[1].replace(/["']/g, '');
-  }
-
-  // Get the zip file as a Blob
-  const blob = await response.blob();
-
-  // Create a download link and trigger it
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  window.URL.revokeObjectURL(url);
-
-  toast({
-    title: "Download ready!",
-    description: "Your highlights zip file has been downloaded.",
-  });
-} catch (error) {
-  console.error("Error uploading file:", error);
-  toast({
-    title: "Upload failed",
-    description: "There was an error processing your file. Please try again.",
-    variant: "destructive",
-  });
-  setProcessingState('idle');
-}
-
-
-    // Simulate API call with processing time (35-60 seconds)
-    const processingTime = Math.random() * 25000 + 35000; // 35-60 seconds
-    
-    setTimeout(() => {
-      setProcessingState('completed');
-      toast({
-        title: "Processing complete!",
-        description: "Your highlights are ready for download.",
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user-highlights`, {
+        method: 'POST',
+        body: formData,
       });
-    }, processingTime);
+      if (!response.ok) throw new Error("Upload failed");
+
+      // Assume backend returns { jobId: string }
+      const { jobId } = await response.json();
+      setJobId(jobId);
+
+      // 2. Start listening for progress updates
+      const evtSource = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/progress/${jobId}`);
+      evtSource.onmessage = async function(event) {
+        const progressValue = Number(event.data);
+        setProgress(progressValue);
+
+        if (progressValue >= 100) {
+          evtSource.close();
+          setProcessingState('completed');
+
+          // 3. Download the zip file from the new GET endpoint
+          // const downloadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download-highlights/${jobId}`);
+          // if (!downloadResponse.ok) throw new Error("Download failed");
+
+          // // Get the filename from the Content-Disposition header if available
+          // const disposition = downloadResponse.headers.get('Content-Disposition');
+          // let filename = 'kindle-clippings.zip';
+          // if (disposition && disposition.includes('filename=')) {
+          //   filename = disposition.split('filename=')[1].replace(/["']/g, '');
+          // }
+
+          // const blob = await downloadResponse.blob();
+          // const url = window.URL.createObjectURL(blob);
+          // const a = document.createElement('a');
+          // a.href = url;
+          // a.download = filename;
+          // document.body.appendChild(a);
+          // a.click();
+          // a.remove();
+          // window.URL.revokeObjectURL(url);
+
+          // toast({
+          //   title: "Download ready!",
+          //   description: "Your highlights zip file has been downloaded.",
+          // });
+
+        }
+      };
+
+      setProcessingState('processing');
+
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error processing your file. Please try again.",
+        variant: "destructive",
+      });
+      setProcessingState('idle');
+    }
   };
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    
-    // Simulate download
-    setTimeout(() => {
-      setIsDownloading(false);
-      toast({
-        title: "Download started",
-        description: "Your zip file is being downloaded.",
-      });
-    }, 2000);
+
+    const downloadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download-highlights/${jobId}`);
+    if (!downloadResponse.ok) throw new Error("Download failed");
+
+    // Get the filename from the Content-Disposition header if available
+    const disposition = downloadResponse.headers.get('Content-Disposition');
+    let filename = 'kindle-clippings.zip';
+    if (disposition && disposition.includes('filename=')) {
+      filename = disposition.split('filename=')[1].replace(/["']/g, '');
+    }
+
+    const blob = await downloadResponse.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download ready!",
+      description: "Your highlights zip file has been downloaded.",
+    });
+
+    setIsDownloading(false);
+
   };
 
   const resetProcess = () => {
@@ -155,7 +186,16 @@ try {
           )}
 
           {processingState === 'processing' && (
-            <ProcessingLoader />
+            <div>
+              <ProcessingLoader />
+              <div className="w-full bg-gray-200 rounded-full h-4 mt-4">
+                <div
+                  className="bg-royal-500 h-4 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="text-center mt-2 text-sm text-gray-600">{progress}%</div>
+            </div>
           )}
 
           {processingState === 'completed' && (
