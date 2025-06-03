@@ -15,6 +15,7 @@ const Index = () => {
   const [progress, setProgress] = useState<number>(0);
   const { toast } = useToast();
   const [jobId, setJobId] = useState<string | null>(null);
+  const [hasDownloaded, setHasDownloaded] = useState(false);
 
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
@@ -130,6 +131,7 @@ const Index = () => {
     });
 
     setIsDownloading(false);
+    setHasDownloaded(true);
 
   };
 
@@ -202,7 +204,8 @@ const Index = () => {
             <div className="space-y-6">
               <DownloadSection 
                 onDownload={handleDownload}
-                isDownloading={isDownloading}
+                isDownloading={isDownloading} 
+                hasDownloaded={hasDownloaded}
               />
               
               <div className="text-center">

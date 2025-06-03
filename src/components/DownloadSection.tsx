@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 interface DownloadSectionProps {
   onDownload: () => void;
   isDownloading?: boolean;
+  hasDownloaded?: boolean;
 }
 
-const DownloadSection: React.FC<DownloadSectionProps> = ({ onDownload, isDownloading }) => {
+const DownloadSection: React.FC<DownloadSectionProps> = ({ onDownload, isDownloading, hasDownloaded }) => {
   return (
     <div className="flex flex-col items-center justify-center py-12 animate-fade-in">
       <div className="relative mb-6">
@@ -28,13 +29,18 @@ const DownloadSection: React.FC<DownloadSectionProps> = ({ onDownload, isDownloa
       
       <Button
         onClick={onDownload}
-        disabled={isDownloading}
+        disabled={isDownloading || hasDownloaded}
         className="bg-gradient-to-r from-royal-500 to-royal-600 hover:from-royal-600 hover:to-royal-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
       >
         {isDownloading ? (
           <>
             <Loader className="mr-2 h-4 w-4 animate-spin" />
             Downloading...
+          </>
+        ) : hasDownloaded ? (
+          <>
+            <CheckCircle className="mr-2 h-4 w-4 text-green-950" />
+            Download Completed.
           </>
         ) : (
           <>
