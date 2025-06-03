@@ -40,13 +40,32 @@ try {
     method: 'POST',
     body: formData,
   });
-
   if (!response.ok) throw new Error("Upload failed");
 
-  const data = await response.json();
-  console.log("Server response:", data);
+  // Get the filename from the Content-Disposition header if available
+  const disposition = response.headers.get('Content-Disposition');
+  let filename = 'highlights.zip';
+  if (disposition && disposition.includes('filename=')) {
+    filename = disposition.split('filename=')[1].replace(/["']/g, '');
+  }
 
-  // Optional: Show toast or update UI
+  // Get the zip file as a Blob
+  const blob = await response.blob();
+
+  // Create a download link and trigger it
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+
+  toast({
+    title: "Download ready!",
+    description: "Your highlights zip file has been downloaded.",
+  });
 } catch (error) {
   console.error("Error uploading file:", error);
   toast({
