@@ -1,0 +1,5 @@
+name = "kindle-clippings"
+compatibility_date = "2025-06-05"
+
+[site]
+bucket = "./dist"
