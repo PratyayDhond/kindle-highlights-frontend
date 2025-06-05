@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Sparkles } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
@@ -17,6 +17,23 @@ const Index = () => {
   const [jobId, setJobId] = useState<string | null>(null);
   const [hasDownloaded, setHasDownloaded] = useState(false);
 
+  useEffect(() => {
+    // perform an api call to health-check the backend
+    const checkBackendHealth = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/health-check/`);
+        if (!response.ok) throw new Error("Backend is not healthy");
+      } catch (error) {
+        toast({
+          title: "Backend Error",
+          description: "Unable to connect to the backend. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    };
+    checkBackendHealth();
+  }, [toast]);
+  
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
     if (processingState === 'completed') {
