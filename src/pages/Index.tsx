@@ -5,6 +5,7 @@ import FileUpload from '@/components/FileUpload';
 import ProcessingLoader from '@/components/ProcessingLoader';
 import DownloadSection from '@/components/DownloadSection';
 import { useToast } from '@/hooks/use-toast';
+import { generatePdfZip } from "@/utils/generatePdfZip";
 
 type ProcessingState = 'idle' | 'processing' | 'completed';
 
@@ -57,54 +58,67 @@ const Index = () => {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user-highlights`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get-user-highlights-json`, {
         method: 'POST',
         body: formData,
       });
       if (!response.ok) throw new Error("Upload failed");
 
       // Assume backend returns { jobId: string }
-      const { jobId } = await response.json();
-      setJobId(jobId);
+      // const { jobId } = await response.json();
+      // setJobId(jobId);
+
+      // I want to access highlights from the response directly
+      const data = await response.json();
+      console.log(data.highlights)
+
+      if (data.highlights) {
+        await generatePdfZip(data.highlights);
+        toast({
+          title: "Download ready!",
+          description: "Your highlights PDFs have been zipped and downloaded.",
+        });
+        setProcessingState('completed');
+      }
 
       // 2. Start listening for progress updates
-      const evtSource = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/progress/${jobId}`);
-      evtSource.onmessage = async function(event) {
-        const progressValue = Number(event.data);
-        setProgress(progressValue);
+      // const evtSource = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/progress/${jobId}`);
+      // evtSource.onmessage = async function(event) {
+      //   const progressValue = Number(event.data);
+      //   setProgress(progressValue);
 
-        if (progressValue >= 100) {
-          evtSource.close();
-          setProcessingState('completed');
+      //   if (progressValue >= 100) {
+      //     evtSource.close();
+      //     setProcessingState('completed');
 
-          // 3. Download the zip file from the new GET endpoint
-          // const downloadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download-highlights/${jobId}`);
-          // if (!downloadResponse.ok) throw new Error("Download failed");
+      //     // 3. Download the zip file from the new GET endpoint
+      //     // const downloadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download-highlights/${jobId}`);
+      //     // if (!downloadResponse.ok) throw new Error("Download failed");
 
-          // // Get the filename from the Content-Disposition header if available
-          // const disposition = downloadResponse.headers.get('Content-Disposition');
-          // let filename = 'kindle-clippings.zip';
-          // if (disposition && disposition.includes('filename=')) {
-          //   filename = disposition.split('filename=')[1].replace(/["']/g, '');
-          // }
+      //     // // Get the filename from the Content-Disposition header if available
+      //     // const disposition = downloadResponse.headers.get('Content-Disposition');
+      //     // let filename = 'kindle-clippings.zip';
+      //     // if (disposition && disposition.includes('filename=')) {
+      //     //   filename = disposition.split('filename=')[1].replace(/["']/g, '');
+      //     // }
 
-          // const blob = await downloadResponse.blob();
-          // const url = window.URL.createObjectURL(blob);
-          // const a = document.createElement('a');
-          // a.href = url;
-          // a.download = filename;
-          // document.body.appendChild(a);
-          // a.click();
-          // a.remove();
-          // window.URL.revokeObjectURL(url);
+      //     // const blob = await downloadResponse.blob();
+      //     // const url = window.URL.createObjectURL(blob);
+      //     // const a = document.createElement('a');
+      //     // a.href = url;
+      //     // a.download = filename;
+      //     // document.body.appendChild(a);
+      //     // a.click();
+      //     // a.remove();
+      //     // window.URL.revokeObjectURL(url);
 
-          // toast({
-          //   title: "Download ready!",
-          //   description: "Your highlights zip file has been downloaded.",
-          // });
+      //     // toast({
+      //     //   title: "Download ready!",
+      //     //   description: "Your highlights zip file has been downloaded.",
+      //     // });
 
-        }
-      };
+      //   }
+      // };
 
       setProcessingState('processing');
 
