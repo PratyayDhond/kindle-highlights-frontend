@@ -17,6 +17,7 @@ const Index = () => {
   const { toast } = useToast();
   const [jobId, setJobId] = useState<string | null>(null);
   const [hasDownloaded, setHasDownloaded] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     // perform an api call to health-check the backend
@@ -53,6 +54,7 @@ const Index = () => {
       });
       return;
     }
+    setIsGenerating(true); // Disable the button
     setProgress(0);
 
     // 1. Upload file and get jobId from backend
@@ -92,6 +94,8 @@ const Index = () => {
         variant: "destructive",
       });
       setProcessingState('idle');
+    } finally {
+      setIsGenerating(false); // Re-enable the button after request completes
     }
   };
 
@@ -170,6 +174,7 @@ const Index = () => {
                 <div className="text-center animate-fade-in">
                   <Button
                     onClick={handleGenerateZip}
+                    disabled={isGenerating}
                     className="bg-gradient-to-r from-royal-500 to-royal-600 hover:from-royal-600 hover:to-royal-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
