@@ -41,7 +41,9 @@ const Index = () => {
       setProcessingState('idle');
     }
   };
-
+  const updateProgress = (addValue) => {
+    setProgress(prev => prev + addValue);
+  }
   const handleGenerateZip = async () => {
     if (!selectedFile) {
       toast({
@@ -64,63 +66,23 @@ const Index = () => {
       });
       if (!response.ok) throw new Error("Upload failed");
 
-      // Assume backend returns { jobId: string }
-      // const { jobId } = await response.json();
-      // setJobId(jobId);
-
       // I want to access highlights from the response directly
       const data = await response.json();
       console.log(data.highlights)
-
+      setProgress(20);
+      setProcessingState('processing');
       if (data.highlights) {
-        await generatePdfZip(data.highlights);
+        await generatePdfZip(data.highlights, updateProgress);
         toast({
           title: "Download ready!",
           description: "Your highlights PDFs have been zipped and downloaded.",
         });
+        setProgress(100)
         setProcessingState('completed');
+        setIsDownloading(false);
+        setHasDownloaded(true);
       }
 
-      // 2. Start listening for progress updates
-      // const evtSource = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/progress/${jobId}`);
-      // evtSource.onmessage = async function(event) {
-      //   const progressValue = Number(event.data);
-      //   setProgress(progressValue);
-
-      //   if (progressValue >= 100) {
-      //     evtSource.close();
-      //     setProcessingState('completed');
-
-      //     // 3. Download the zip file from the new GET endpoint
-      //     // const downloadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download-highlights/${jobId}`);
-      //     // if (!downloadResponse.ok) throw new Error("Download failed");
-
-      //     // // Get the filename from the Content-Disposition header if available
-      //     // const disposition = downloadResponse.headers.get('Content-Disposition');
-      //     // let filename = 'kindle-clippings.zip';
-      //     // if (disposition && disposition.includes('filename=')) {
-      //     //   filename = disposition.split('filename=')[1].replace(/["']/g, '');
-      //     // }
-
-      //     // const blob = await downloadResponse.blob();
-      //     // const url = window.URL.createObjectURL(blob);
-      //     // const a = document.createElement('a');
-      //     // a.href = url;
-      //     // a.download = filename;
-      //     // document.body.appendChild(a);
-      //     // a.click();
-      //     // a.remove();
-      //     // window.URL.revokeObjectURL(url);
-
-      //     // toast({
-      //     //   title: "Download ready!",
-      //     //   description: "Your highlights zip file has been downloaded.",
-      //     // });
-
-      //   }
-      // };
-
-      setProcessingState('processing');
 
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -227,7 +189,7 @@ const Index = () => {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="text-center mt-2 text-sm text-gray-600">{progress}%</div>
+              <div className="text-center mt-2 text-sm text-gray-600">  {progress.toFixed(2)}%</div>
             </div>
           )}
 
