@@ -79,7 +79,6 @@ const BookPdf = ({ title, author, content }) => {
               <Text style={styles.metaText}>
                 {counterLabel}
                 {item.page ? ` | Page: ${item.page}` : ''}
-                {item.page && (item.location || item.timestamp) ? ' | ' : ''}
                 {item.location ? ` | Location: ${item.location}` : ''}
                 {item.location && item.timestamp ? ' | ' : ''}
                 {item.timestamp ? ` | ${item.timestamp}` : ''}
