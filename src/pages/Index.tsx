@@ -6,6 +6,8 @@ import ProcessingLoader from '@/components/ProcessingLoader';
 import DownloadSection from '@/components/DownloadSection';
 import { useToast } from '@/hooks/use-toast';
 import { generatePdfZip } from "@/utils/generatePdfZip";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type ProcessingState = 'idle' | 'processing' | 'completed';
 
@@ -14,10 +16,11 @@ const Index = () => {
   const [processingState, setProcessingState] = useState<ProcessingState>('idle');
   const [isDownloading, setIsDownloading] = useState(false);
   const [progress, setProgress] = useState<number>(0);
-  const { toast } = useToast();
+  const { toast: toastSonner } = useToast();
   const [jobId, setJobId] = useState<string | null>(null);
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // perform an api call to health-check the backend
@@ -26,7 +29,7 @@ const Index = () => {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/health-check/`);
         if (!response.ok) throw new Error("Backend is not healthy");
       } catch (error) {
-        toast({
+        toastSonner({
           title: "Backend Error",
           description: "Unable to connect to the backend. Please try again later.",
           variant: "destructive",
@@ -34,7 +37,7 @@ const Index = () => {
       }
     };
     checkBackendHealth();
-  }, [toast]);
+  }, [toastSonner]);
   
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
@@ -47,7 +50,7 @@ const Index = () => {
   }
   const handleGenerateZip = async () => {
     if (!selectedFile) {
-      toast({
+      toastSonner({
         title: "No file selected",
         description: "Please select a clippings.txt file first.",
         variant: "destructive",
@@ -75,7 +78,7 @@ const Index = () => {
       setProcessingState('processing');
       if (data.highlights) {
         await generatePdfZip(data.highlights, updateProgress);
-        toast({
+        toastSonner({
           title: "Download ready!",
           description: "Your highlights PDFs have been zipped and downloaded.",
         });
@@ -88,7 +91,7 @@ const Index = () => {
 
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast({
+      toastSonner({
         title: "Upload failed",
         description: "There was an error processing your file. Please try again.",
         variant: "destructive",
@@ -122,7 +125,7 @@ const Index = () => {
     a.remove();
     window.URL.revokeObjectURL(url);
 
-    toast({
+    toastSonner({
       title: "Download ready!",
       description: "Your highlights zip file has been downloaded.",
     });
@@ -138,8 +141,31 @@ const Index = () => {
     setIsDownloading(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      toast.success("Logged out successfully!");
+      navigate("/auth");
+    } catch (err) {
+      toast.error("Logout failed. Please try again.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 flex flex-col items-center justify-center p-6 relative">
+      {/* Logout button top right */}
+      <div className="absolute top-6 right-8 z-50">
+        <Button
+          onClick={handleLogout}
+          className="bg-royal-500 text-white hover:bg-royal-600"
+          variant="outline"
+        >
+          Logout
+        </Button>
+      </div>
       <div className="w-full max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12 animate-fade-in">

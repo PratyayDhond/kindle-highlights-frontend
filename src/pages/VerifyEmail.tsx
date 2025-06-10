@@ -55,7 +55,7 @@ const VerifyEmail = () => {
         {status === "success" && (
           <>
             <div className="text-green-600 font-semibold mb-4">{message}</div>
-            <div className="text-gray-700 mb-4">
+            <div className="text-gray-700 mb-4">    
               Redirecting you to login in {countdown}...
             </div>
             <Button className="w-full bg-royal-500 text-white hover:bg-royal-600" onClick={() => navigate("/auth")}>

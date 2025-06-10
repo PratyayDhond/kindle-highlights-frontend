@@ -49,9 +49,12 @@ const Auth = () => {
           email: cleanedEmail,
           password: form.password,
         }),
+        credentials: "include", // <-- This is important
+        // Why credentials: "include"?
+        // This ensures cookies (like session cookies) are sent with the request
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         toast.error(data.message || "Login failed. Please check your credentials.");
         return;
       }
@@ -81,6 +84,7 @@ const Auth = () => {
           password: form.password,
           confirmPassword: form.confirmPassword,
         }),
+        credentials: "include", // <-- This is important!
       });
 
       const data = await res.json();
