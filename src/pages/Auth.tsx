@@ -150,8 +150,10 @@ const Auth = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ token: credentialResponse.credential }),
+        credentials: "include", // <-- This is required!
       });
       const data = await response.json();
+      console.log("Google login response:", data);
       if (!response.ok) {
         console.error("Backend verification failed:", data);
         toast.error(data.message || "Backend verification failed");
