@@ -73,7 +73,7 @@ const Index = () => {
 
       // I want to access highlights from the response directly
       const data = await response.json();
-      console.log(data.highlights)
+      // console.log(data.highlights)
       setProgress(20);
       setProcessingState('processing');
       if (data.highlights) {
