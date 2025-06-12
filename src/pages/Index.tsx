@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, Sparkles, Menu } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProcessingLoader from '@/components/ProcessingLoader';
 import DownloadSection from '@/components/DownloadSection';
@@ -8,10 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { generatePdfZip } from "@/utils/generatePdfZip";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import CoinsDashboard from '@/components/CoinsDashboard';
+import { useCoins } from "@/context/CoinsContext";
 
 type ProcessingState = 'idle' | 'processing' | 'completed';
 
 const Index = () => {
+  const { coins, setCoins } = useCoins();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState>('idle');
   const [isDownloading, setIsDownloading] = useState(false);
@@ -20,6 +23,7 @@ const Index = () => {
   const [jobId, setJobId] = useState<string | null>(null);
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,7 +42,21 @@ const Index = () => {
     };
     checkBackendHealth();
   }, [toastSonner]);
-  
+
+  useEffect(() => {
+    if (coins === undefined) {
+      // Only fetch if coins is undefined
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/coins`, {
+        credentials: "include",
+      })
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+          if (typeof data.coins === "number") setCoins(data.coins);
+        })
+        .catch(() => {});
+    }
+  }, [coins, setCoins]);
+
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
     if (processingState === 'completed') {
@@ -57,10 +75,9 @@ const Index = () => {
       });
       return;
     }
-    setIsGenerating(true); // Disable the button
+    setIsGenerating(true);
     setProgress(0);
 
-    // 1. Upload file and get jobId from backend
     const formData = new FormData();
     formData.append('file', selectedFile);
 
@@ -68,12 +85,28 @@ const Index = () => {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get-user-highlights-json`, {
         method: 'POST',
         body: formData,
+        credentials: 'include'
       });
+
+      if (response.status === 402) {
+        const data = await response.json();
+        toastSonner({
+          title: "Not enough coins",
+          description: data.message || "You do not have enough coins to process these books.",
+          variant: "destructive",
+        });
+        setProcessingState('idle');
+        return;
+      }
+
       if (!response.ok) throw new Error("Upload failed");
 
-      // I want to access highlights from the response directly
       const data = await response.json();
-      // console.log(data.highlights)
+
+      if (typeof data.coins === "number") {
+        setCoins(data.coins);
+      }
+
       setProgress(20);
       setProcessingState('processing');
       if (data.highlights) {
@@ -87,18 +120,16 @@ const Index = () => {
         setIsDownloading(false);
         setHasDownloaded(true);
       }
-
-
     } catch (error) {
       console.error("Error uploading file:", error);
       toastSonner({
         title: "Upload failed",
-        description: "There was an error processing your file. Please try again.",
+        description: error.message || "There was an error processing your file. Please try again.",
         variant: "destructive",
       });
       setProcessingState('idle');
     } finally {
-      setIsGenerating(false); // Re-enable the button after request completes
+      setIsGenerating(false);
     }
   };
 
@@ -156,16 +187,45 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 flex flex-col items-center justify-center p-6 relative">
-      {/* Logout button top right */}
-      <div className="absolute top-6 right-8 z-50">
-        <Button
-          onClick={handleLogout}
-          className="bg-royal-500 text-white hover:bg-royal-600"
-          variant="outline"
+      {/* Burger menu top left */}
+      <div className="absolute top-6 left-8 z-50">
+        <button
+          onClick={() => setDashboardOpen(true)}
+          className="p-2 rounded-full bg-white shadow hover:bg-gray-100"
         >
-          Logout
-        </Button>
+          <Menu className="h-6 w-6 text-royal-500" />
+        </button>
       </div>
+
+      {/* Coins dashboard top right */}
+      <div className="absolute top-6 right-8 z-50">
+        <CoinsDashboard coins={coins} />
+      </div>
+
+      {/* Dashboard Drawer */}
+      {dashboardOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex">
+          <div className="bg-white w-64 h-full shadow-xl p-6 flex flex-col">
+            <button
+              onClick={() => setDashboardOpen(false)}
+              className="self-end mb-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold mb-6">Dashboard</h2>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-royal-500 text-white rounded px-4 py-2 hover:bg-royal-600"
+            >
+              Logout
+            </button>
+            {/* Add more dashboard items here */}
+          </div>
+          {/* Click outside to close */}
+          <div className="flex-1" onClick={() => setDashboardOpen(false)} />
+        </div>
+      )}
+
       <div className="w-full max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12 animate-fade-in">

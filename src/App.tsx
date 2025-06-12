@@ -8,32 +8,35 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import VerifyEmail from "@/pages/VerifyEmail";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { CoinsProvider } from "@/context/CoinsContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* <Route path="/" element={<Index />} /> */}
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <CoinsProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* <Route path="/" element={<Index />} /> */}
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </CoinsProvider>
   </QueryClientProvider>
 );
 

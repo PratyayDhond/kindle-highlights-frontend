@@ -4,8 +4,10 @@ import { Mail, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
+import { useCoins } from "@/context/CoinsContext";
 
 const Auth = () => {
+  const { setCoins } = useCoins();
   const navigate = useNavigate();
   const [authMode, setAuthMode] = useState<"main" | "login" | "signup">("main");
 
@@ -57,6 +59,10 @@ const Auth = () => {
       if (!res.ok) {
         toast.error(data.message || "Login failed. Please check your credentials.");
         return;
+      }
+      // Set coins from the login API result
+      if (typeof data.coins === "number") {
+        setCoins(data.coins);
       }
       toast.success("Login successful!");
       navigate("/");
@@ -153,7 +159,6 @@ const Auth = () => {
         credentials: "include", // <-- This is required!
       });
       const data = await response.json();
-      // console.log("Google login response:", data);
       if (!response.ok) {
         console.error("Backend verification failed:", data);
         toast.error(data.message || "Backend verification failed");
@@ -162,9 +167,13 @@ const Auth = () => {
       if (!data.googleId) {
         toast.error(data.message || "Login failed. You did not use Google to login with this email.");
       } else {
+        // Set coins from the Google login API result
+        if (typeof data.coins === "number") {
+          setCoins(data.coins);
+        }
         toast.success(data.message || "Login successful!");
         navigate("/");
-      } 
+      }
     } catch (error) {
       console.error("Error during backend verification:", error);
       toast.error("Backend verification failed");
