@@ -6,20 +6,34 @@ const whatsNewData = [
 		date: "2025-06-20",
 		changes: [
 			"Added What's New page with timeline.",
-			"Improved GitHub Pages deployment.",
-			"Fixed asset path issues.",
+			"Added Coins System for Processing highlights.",
+			"UI/UX Improvements.",
 		],
 	},
 	{
 		version: "v1.1.0",
 		date: "2025-05-15",
-		changes: ["Added user dashboard.", "Enhanced search functionality."],
+		changes: ["Added Authentication Flow."],
 	},
 	{
 		version: "v1.0.0",
 		date: "2025-04-01",
-		changes: ["Initial release."],
+		changes: [
+			"File Upload & Processing.",
+      "PDF Generation for Highlights.",
+      "Switched to Processing highlights using HTML->PDF",
+      "Added Privacy: Backend deletes data and does not generate zip file.",  
+    ],
 	},
+  {
+    version: "0.1.0 (BETA)",
+    date: "2024-12-01",
+    changes: [
+      "Initial Release with basic features.",
+      "Backend generates zip file.",
+      "Processing highlights using MD->PDF via md-to-pdf library",
+    ],
+  },
 ];
 
 export default function WhatsNew() {
@@ -28,7 +42,7 @@ export default function WhatsNew() {
 			<h1 className="text-3xl font-bold mb-8 text-center text-royal-700">
 				What's New
 			</h1>
-			<div className="relative border-l-2 border-royal-300 pl-8 flex flex-col gap-12 max-h-[500px] overflow-y-auto">
+			<div className="relative border-l-2 border-royal-300 pl-8 flex flex-col gap-12 max-h-[95vh] overflow-y-auto">
 				{whatsNewData.map((entry, idx) => (
 					<div key={entry.version} className="relative group">
 						{/* Timeline dot */}
