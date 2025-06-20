@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import CoinsDashboard from '@/components/CoinsDashboard';
 import { useCoins } from "@/context/CoinsContext";
+import DashboardDrawer from "@/components/DashboardDrawer";
 
 type ProcessingState = 'idle' | 'processing' | 'completed';
 
@@ -203,28 +204,11 @@ const Index = () => {
       </div>
 
       {/* Dashboard Drawer */}
-      {dashboardOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex">
-          <div className="bg-white w-64 h-full shadow-xl p-6 flex flex-col">
-            <button
-              onClick={() => setDashboardOpen(false)}
-              className="self-end mb-4 text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-            <h2 className="text-xl font-bold mb-6">Dashboard</h2>
-            <button
-              onClick={handleLogout}
-              className="w-full bg-royal-500 text-white rounded px-4 py-2 hover:bg-royal-600"
-            >
-              Logout
-            </button>
-            {/* Add more dashboard items here */}
-          </div>
-          {/* Click outside to close */}
-          <div className="flex-1" onClick={() => setDashboardOpen(false)} />
-        </div>
-      )}
+      <DashboardDrawer
+        open={dashboardOpen}
+        onClose={() => setDashboardOpen(false)}
+        onLogout={handleLogout}
+      />
 
       <div className="w-full max-w-2xl mx-auto">
         {/* Header */}

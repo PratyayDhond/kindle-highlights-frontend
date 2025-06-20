@@ -39,32 +39,6 @@
   - spinner animation with messages during authentication checks.
   - Responsive and modern color palette using royal blue, and gray tones.
 
-
-## Getting Started
-
-1. Install dependencies:  
-   `npm install` or `bun install`
-
-2. Run locally:  
-   `npm run dev` or `bun run dev`
-
-3. Build for production:  
-   `npm run build` or `bun run build`
-
-4. Deploy using Cloudflare Pages with `dist` as the publish directory.
-
----
-
-## Tech Stack
-
-- React + Vite
-- Tailwind CSS
-- Cloudflare Pages
-- Context API for global state
-- REST API backend
-
----
-
-## License
-
-MIT
+- **What's New Timeline**
+  - Added What's new timeline accessible through dashboard to see version changes for the application
+  - What's new page is static and displays details from the what's new file itself
