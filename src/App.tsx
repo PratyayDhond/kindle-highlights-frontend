@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import VerifyEmail from "@/pages/VerifyEmail";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CoinsProvider } from "@/context/CoinsContext";
+import Footer from "@/components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <Footer />
       </TooltipProvider>
     </CoinsProvider>
   </QueryClientProvider>
