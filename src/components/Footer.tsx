@@ -1,9 +1,8 @@
-import React from "react";
 
 const Footer = () => (
   <footer className="w-full py-3 px-4 text-xs text-gray-500 bg-white border-t border-gray-200 flex items-center justify-between">
     <span>
-      Version ${} &nbsp;|&nbsp; &copy; {new Date().getFullYear()} dhondpratyay
+      Version ${import.meta.env.VITE_FRONTEND_VERSION} &nbsp;|&nbsp; &copy; {new Date().getFullYear()} dhondpratyay
     </span>
     <div className="flex gap-3 items-center">
       <a
