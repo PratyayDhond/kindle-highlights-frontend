@@ -2,9 +2,10 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const navLinks = [
-  { label: "Home", path: "/" },
+    { label: "Home", path: "/" },
 //   { label: "Tool", path: "/tool" },
-  { label: "What's New", path: "/whats-new" },
+    { label: "Dashboard", path: "/dashboard" }, 
+    { label: "What's New", path: "/whats-new" },
 ];
 
 const Header: React.FC = () => {

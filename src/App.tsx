@@ -12,6 +12,7 @@ import { CoinsProvider } from "@/context/CoinsContext";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import WhatsNew from "./pages/WhatsNew";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,13 @@ const App = () => (
               }
             />
             <Route path="/whats-new" element={<WhatsNew />} />
+            <Route 
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

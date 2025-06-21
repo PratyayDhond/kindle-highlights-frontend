@@ -46,7 +46,8 @@ const whatsNewData = [
 
 export default function WhatsNew() {
 	return (
-		<div className="flex flex-col min-h-[89vh]">
+		// bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 This gives the gradient like look to the page background
+		<div className="flex flex-col min-h-[89vh] bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30">
 			<div className="flex-1 max-w-xl mx-auto py-10 px-4 w-full">
 				<h1 className="text-3xl font-bold mb-8 text-center text-royal-700">
 					What's New
