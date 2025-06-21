@@ -10,6 +10,7 @@ import VerifyEmail from "@/pages/VerifyEmail";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CoinsProvider } from "@/context/CoinsContext";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import WhatsNew from "./pages/WhatsNew";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Header />
           <Routes>
             {/* <Route path="/" element={<Index />} /> */}
             <Route path="/auth" element={<Auth />} />

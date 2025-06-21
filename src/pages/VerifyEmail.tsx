@@ -49,7 +49,7 @@ const VerifyEmail = () => {
   }, [status, countdown, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 p-6">
+    <div className="min-h-[89vh] flex flex-col items-center justify-center bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 p-6">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 glass-effect text-center">
         {status === "pending" && <div>Verifying your email...</div>}
         {status === "success" && (

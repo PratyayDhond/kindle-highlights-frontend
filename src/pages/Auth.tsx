@@ -181,7 +181,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 p-6">
+    <div className="min-h-[89vh] flex flex-col items-center justify-center bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 p-6">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 glass-effect">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Login to Kindle Clippings

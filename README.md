@@ -42,3 +42,14 @@
 - **What's New Timeline**
   - Added What's new timeline accessible through dashboard to see version changes for the application
   - What's new page is static and displays details from the what's new file itself
+
+
+## Version 1.2.1
+
+- **UI/UX Improvements**
+  - DASHBOARD UI Improvements
+    - Moved Logout to Bottom of the Dashboard 
+    - Color and Underscore animation for What's new component in Dashboard
+    - Added Header Component to for Navigating to home from WhatsNew and any other future page.
+
+  

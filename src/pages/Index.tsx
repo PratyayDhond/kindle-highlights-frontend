@@ -187,7 +187,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 flex flex-col items-center justify-center p-6 relative">
+    <div className="min-h-[89vh] bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 flex flex-col items-center justify-center p-6 relative">
       {/* Burger menu top left */}
       <div className="absolute top-6 left-8 z-50">
         <button

@@ -23,21 +23,28 @@ const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogo
         </button>
         <h2 className="text-xl font-bold mb-6">Dashboard</h2>
         <button
-          onClick={onLogout}
-          className="w-full bg-royal-500 text-white rounded px-4 py-2 hover:bg-royal-600 mb-4"
-        >
-          Logout
-        </button>
-        <button
           onClick={() => {
             navigate("/whats-new");
             onClose();
           }}
-          className="w-full text-left px-4 py-2 rounded hover:bg-royal-50 text-royal-600"
+          className="w-full text-left px-4 py-2 rounded transition-colors hover:text-fuchsia-800 text-royal-600 group"
         >
-          What's New
+          <span className="relative inline-block">
+            What's New
+            <span
+              className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-royal-600 transition-all duration-300 group-hover:w-full"
+            />
+          </span>
         </button>
         {/* Add more dashboard items here */}
+        <div className="flex-1" />
+        <button
+          onClick={onLogout}
+          className="w-full bg-royal-500 text-white rounded px-4 py-2 hover:bg-royal-600 mt-4"
+          style={{ marginTop: "auto" }}
+        >
+          Logout
+        </button>
       </div>
       {/* Click outside to close */}
       <div className="flex-1" onClick={onClose} />
