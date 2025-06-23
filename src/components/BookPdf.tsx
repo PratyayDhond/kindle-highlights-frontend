@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
 const BookPdf = ({ title, author, content }) => {
   let highlightCount = 0;
   let noteCount = 0;
-
   const filteredContent = content.filter(item => item.type !== 'bookmark');
   console.log('Creating PDF for:', title);
   return (
@@ -61,6 +60,8 @@ const BookPdf = ({ title, author, content }) => {
 
         {filteredContent.map((item, idx) => {
           let counterLabel = '';
+          // console.log(item.location.start, item.location.end);
+
           if (item.type === 'highlight') {
             highlightCount += 1;
             counterLabel = `Highlight ${highlightCount}`;
@@ -68,6 +69,7 @@ const BookPdf = ({ title, author, content }) => {
             noteCount += 1;
             counterLabel = `Note ${noteCount}`;
           }
+
 
           return (
             <View key={idx}>
@@ -79,7 +81,8 @@ const BookPdf = ({ title, author, content }) => {
               <Text style={styles.metaText}>
                 {counterLabel}
                 {item.page ? ` | Page: ${item.page}` : ''}
-                {item.location ? ` | Location: ${item.location}` : ''}
+                {item.location ? ` | Location: ${item.location.start}` : ''}
+                {item.location && item.location.end !== -1 ? ` - ${item.location.end}` : ''}
                 {item.location && item.timestamp ? ' | ' : ''}
                 {item.timestamp ? ` | ${item.timestamp}` : ''}
               </Text>
