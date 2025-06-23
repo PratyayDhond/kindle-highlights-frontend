@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import BookPdf from "../components/BookPdf";
 import { pdf } from "@react-pdf/renderer";
 import { useNavigate } from "react-router-dom";
+import GlobalSearchBar from "@/components/GlobalSearchBar";
 
 interface Book {
   _id: string;
@@ -42,6 +43,7 @@ export default function Dashboard() {
   const [lastFile, setLastFile] = useState<File | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
+  const [search, setSearch] = useState(""); // Add this line for search state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -145,6 +147,13 @@ export default function Dashboard() {
     }
   };
 
+  // Filter books by title or author (case-insensitive)
+  const filteredBooks = books.filter(
+    (book) =>
+      book.title.toLowerCase().includes(search.toLowerCase()) ||
+      book.author.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
       {/* Header placeholder */}
@@ -188,6 +197,13 @@ export default function Dashboard() {
         {/* Main content */}
         <main className="flex-1 max-w-7xl mx-auto py-10 px-4 flex flex-col items-center justify-center transition-all duration-300">
           <h1 className="text-3xl font-bold mb-8 text-center text-royal-700">Dashboard</h1>
+          {/* Add GlobalSearchBar here */}
+          <GlobalSearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search books by title or author..."
+            className="max-w-md w-full mb-8"
+          />
           <div className="w-full flex justify-center">
             <div
               className={
@@ -197,7 +213,7 @@ export default function Dashboard() {
                   : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
               }
             >
-              {books.map((book) => (
+              {filteredBooks.map((book) => (
                 <div
                   key={book._id}
                   className="bg-white rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[320px] max-h-[380px] max-w-xs w-full"

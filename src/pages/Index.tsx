@@ -343,10 +343,9 @@ const Index = () => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="text-center mt-8 animate-fade-in">
           <p className="text-sm text-gray-500">
-            Your files are processed securely and never stored on our servers.
+            Your files are processed securely and never stored on our servers without your consent.
           </p>
         </div>
       </div>
