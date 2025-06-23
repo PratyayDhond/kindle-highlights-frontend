@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import UploadClippingsSidebar from "@/components/UploadClippingsSidebar";
 import { Menu } from "lucide-react";
+import BookPdf from "../components/BookPdf";
+import { pdf } from "@react-pdf/renderer";
 
 interface Book {
   _id: string;
@@ -82,6 +84,46 @@ export default function Dashboard() {
     if (file) setLastFile(file);
   };
 
+  // Add this function inside your Dashboard component
+  const downloadPdf = async (bookId: string, title: string) => {
+    try {
+      // Make a GET request with bookId as a URL param
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/book/${encodeURIComponent(bookId)}`,
+        {
+          credentials: "include",
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch book PDF");
+      const data = await response.json();
+      console.log("Book PDF data:", data.book);
+      const blob = await pdf(
+        <BookPdf
+          title={data.book.title}
+          author={data.book.author}
+          content={data.book.highlights}
+        />
+      ).toBlob();
+      // If you want to trigger a download  in the browser:
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `book-${title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      // Or, if your backend returns a redirect or a direct PDF URL, you can use:
+      // window.open(`${import.meta.env.VITE_BACKEND_URL}/user/book/${encodeURIComponent(bookId)}`, "_blank");
+    } catch (err) {
+      // Optionally show a toast or alert
+      alert("Failed to download PDF.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
       {/* Header placeholder */}
@@ -153,12 +195,12 @@ export default function Dashboard() {
                     >
                       Open
                     </button>
-                    <a
-                      download
+                    <button
                       className="px-3 py-1 rounded bg-royal-500 text-white hover:bg-royal-600 transition"
+                      onClick={() => downloadPdf(book._id, book.title)}
                     >
                       Download PDF
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}
