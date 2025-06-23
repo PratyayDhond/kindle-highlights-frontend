@@ -3,7 +3,7 @@ import UploadClippingsSidebar from "@/components/UploadClippingsSidebar";
 import { Menu } from "lucide-react";
 
 interface Book {
-  id: string;
+  _id: string;
   title: string;
   author: string;
   coverUrl?: string;
@@ -15,105 +15,6 @@ interface Book {
   }[];
 }
 
-const mockBooks: Book[] = [
-  {
-    id: "1",
-    title: "Atomic Habits",
-    author: "James Clear",
-    highlights: [
-      {
-        highlight: "Atomic habits are the building blocks of success.",
-        page: 23,
-        location: "834-835",
-        timeStamp: "2023-10-01T12:00:00Z",
-      },
-      {
-        highlight: "You do not rise to the level of your goals. You fall to the level of your systems.",
-        page: 45,
-        location: "1234-1235",
-        timeStamp: "2023-10-02T14:30:00Z",
-      },
-    ],
-  },
-  {
-    id: "2",
-    title: "Deep Work",
-    author: "Cal Newport",
-    highlights: [
-      {
-        highlight: "Deep work is the ability to focus without distraction on cognitively demanding tasks.",
-        page: 67,
-        location: "456-457",
-        timeStamp: "2023-10-03T09:15:00Z",
-      },
-    ],
-  },
-    {
-    id: "3",
-    title: "Atomic Habits",
-    author: "James Clear",
-    highlights: [
-      {
-        highlight: "Atomic habits are the building blocks of success.",
-        page: 23,
-        location: "834-835",
-        timeStamp: "2023-10-01T12:00:00Z",
-      },
-      {
-        highlight: "You do not rise to the level of your goals. You fall to the level of your systems.",
-        page: 45,
-        location: "1234-1235",
-        timeStamp: "2023-10-02T14:30:00Z",
-      },
-    ],
-  },
-  {
-    id: "4",
-    title: "Deep Work",
-    author: "Cal Newport",
-    highlights: [
-      {
-        highlight: "Deep work is the ability to focus without distraction on cognitively demanding tasks.",
-        page: 67,
-        location: "456-457",
-        timeStamp: "2023-10-03T09:15:00Z",
-      },
-    ],
-  },
-    {
-    id: "5",
-    title: "Atomic Habits",
-    author: "James Clear",
-    highlights: [
-      {
-        highlight: "Atomic habits are the building blocks of success.",
-        page: 23,
-        location: "834-835",
-        timeStamp: "2023-10-01T12:00:00Z",
-      },
-      {
-        highlight: "You do not rise to the level of your goals. You fall to the level of your systems.",
-        page: 45,
-        location: "1234-1235",
-        timeStamp: "2023-10-02T14:30:00Z",
-      },
-    ],
-  },
-  {
-    id: "6",
-    title: "Deep Work",
-    author: "Cal Newport",
-    highlights: [
-      {
-        highlight: "Deep work is the ability to focus without distraction on cognitively demanding tasks.",
-        page: 67,
-        location: "456-457",
-        timeStamp: "2023-10-03T09:15:00Z",
-      },
-    ],
-  },
-];
-
 const mockStats = {
   totalBooks: 5,
   totalHighlights: 42,
@@ -122,6 +23,17 @@ const mockStats = {
   maxHighlights: 15,
 };
 
+// Add this helper function at the top (outside the component)
+function getRandomPlaceholder(bookId: string, total = 4) {
+  // Deterministic: always same placeholder for same book
+  let hash = 0;
+  for (let i = 0; i < bookId.length; i++) {
+    hash = (hash * 31 + bookId.charCodeAt(i)) % total;
+  }
+  // Placeholders should be named: book-cover-placeholders/cover1.png, cover2.png, ..., cover20.png
+  return `/book-cover-placeholders/${hash + 1}.png`;
+}
+
 export default function Dashboard() {
   const [books, setBooks] = useState<Book[]>([]);
   const [lastFile, setLastFile] = useState<File | null>(null);
@@ -129,7 +41,34 @@ export default function Dashboard() {
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
 
   useEffect(() => {
-    setBooks(mockBooks);
+    const fetchBooks = async () => {
+      // Try to get books from localStorage cache first
+      const cached = localStorage.getItem("dashboard_books");
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setBooks(parsed);
+        } catch {
+        }
+      }
+      // This request is not that costly so we should allow it for all users.
+      // The following backend request is to fetch only the books and author for users
+      // Fetch from backend if not in cache
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to fetch books");
+        const data = await response.json();
+        setBooks(data.books || []);
+        localStorage.setItem("dashboard_books", JSON.stringify(data.books || []));
+      } catch (err) {
+        // Optionally handle error (show toast, etc.)
+        setBooks([]);
+      }
+    };
+
+    fetchBooks();
   }, []);
 
   useEffect(() => {
@@ -197,11 +136,11 @@ export default function Dashboard() {
             >
               {books.map((book) => (
                 <div
-                  key={book.id}
+                  key={book._id}
                   className="bg-white rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[320px] max-h-[380px] max-w-xs w-full"
                 >
                   <img
-                    src={book.coverUrl || "/placeholder.svg"}
+                    src={book.coverUrl || getRandomPlaceholder(book._id)}
                     alt={book.title}
                     className="w-24 h-32 object-cover rounded mb-3"
                   />
