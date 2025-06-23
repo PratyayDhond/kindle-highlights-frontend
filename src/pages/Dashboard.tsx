@@ -3,6 +3,7 @@ import UploadClippingsSidebar from "@/components/UploadClippingsSidebar";
 import { Menu } from "lucide-react";
 import BookPdf from "../components/BookPdf";
 import { pdf } from "@react-pdf/renderer";
+import { useNavigate } from "react-router-dom";
 
 interface Book {
   _id: string;
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const [lastFile, setLastFile] = useState<File | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -124,6 +126,25 @@ export default function Dashboard() {
     }
   };
 
+  const handleOpenBook = async (bookId: string) => {
+    try {
+      // Option 1: Fetch book data and pass via state (recommended for sensitive/private data)
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/book/${encodeURIComponent(bookId)}`,
+        {
+          credentials: "include",
+          method: "GET",
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch book data");
+      const data = await response.json();
+      // Navigate to /book/:bookId and pass book data as state
+      navigate(`/book/${bookId}`, { state: { book: data.book } });
+    } catch (err) {
+      alert("Failed to open book.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
       {/* Header placeholder */}
@@ -191,7 +212,7 @@ export default function Dashboard() {
                   <div className="flex gap-2 mt-auto">
                     <button
                       className="px-3 py-1 rounded bg-royal-100 text-royal-700 hover:bg-royal-200 transition"
-                      onClick={() => alert(`Open ${book.title} online`)}
+                      onClick={() => handleOpenBook(book._id)}
                     >
                       Open
                     </button>

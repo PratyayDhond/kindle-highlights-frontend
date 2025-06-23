@@ -13,6 +13,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import WhatsNew from "./pages/WhatsNew";
 import Dashboard from "./pages/Dashboard";
+import BookOnlineView from "./pages/BookOnlineView";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,13 @@ const App = () => (
                   <Dashboard />
                 </ProtectedRoute>
               } />
+            <Route
+              path="/book/:bookId" 
+              element={
+                <ProtectedRoute>
+                  <BookOnlineView />
+                </ProtectedRoute>                
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
