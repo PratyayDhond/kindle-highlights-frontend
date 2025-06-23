@@ -12,6 +12,8 @@ import CoinsDashboard from '@/components/CoinsDashboard';
 import { useCoins } from "@/context/CoinsContext";
 import DashboardDrawer from "@/components/DashboardDrawer";
 
+const MAX_FILE_SIZE_MB = import.meta.env.VITE_MAX_FILE_SIZE_MB;
+
 type ProcessingState = 'idle' | 'processing' | 'completed';
 
 const Index = () => {
@@ -25,6 +27,7 @@ const Index = () => {
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [consent, setConsent] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,7 +62,30 @@ const Index = () => {
   }, [coins, setCoins]);
 
   const handleFileSelect = (file: File | null) => {
+    if (file) {
+      // Restrict to .txt files only
+      if (!file.name.toLowerCase().endsWith(".txt")) {
+        toastSonner({
+          title: "Invalid file type",
+          description: "Only .txt files are allowed.",
+          variant: "destructive",
+        });
+        setSelectedFile(null);
+        return;
+      }
+      // Restrict file size
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toastSonner({
+          title: "File too large",
+          description: `The file size must be less than ${MAX_FILE_SIZE_MB}MB.`,
+          variant: "destructive",
+        });
+        setSelectedFile(null);
+        return;
+      }
+    }
     setSelectedFile(file);
+    setConsent(true); // Reset consent to true on new file
     if (processingState === 'completed') {
       setProcessingState('idle');
     }
@@ -81,6 +107,7 @@ const Index = () => {
 
     const formData = new FormData();
     formData.append('file', selectedFile);
+    formData.append('consent', consent ? 'true' : 'false');
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get-user-highlights-json`, {
@@ -239,7 +266,23 @@ const Index = () => {
                 onFileSelect={handleFileSelect}
                 selectedFile={selectedFile}
               />
-              
+
+              {/* Consent Checkbox: show only if a file is selected */}
+              {selectedFile && (
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="dashboard-consent"
+                    checked={consent}
+                    onChange={e => setConsent(e.target.checked)}
+                    className="accent-royal-500"
+                  />
+                  <label htmlFor="dashboard-consent" className="text-sm text-gray-700 select-none">
+                    I agree to use '{selectedFile.name}' to personalize and display its content on my dashboard.
+                  </label>
+                </div>
+              )}
+
               {selectedFile && (
                 <div className="text-center animate-fade-in">
                   <Button
