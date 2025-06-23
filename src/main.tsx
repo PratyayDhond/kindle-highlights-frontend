@@ -8,3 +8,9 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </GoogleOAuthProvider>
 );
+
+// Rename Current Component to SideMenu or DashboardSideBar/DashboardSideMenu
+// Rename Index's Dashboard component to IndexSidebar or IndexSideMenu
+// Add A search filter option to the Dashboard page to search a specific Book. (In backend add a specific userBooks array to DB to fetch directly the text for user's read books instead of all the data)
+
+// Add a spending history, to track coins spent by user. This can be tracked by storing transactions in the user object.

@@ -118,3 +118,5 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
 );
 
 export default UploadClippingsSidebar;
+
+

@@ -127,7 +127,18 @@ const Index = () => {
         return;
       }
 
-      if (!response.ok) throw new Error("Upload failed");
+      if(response.status === 418){
+        const data = await response.json();
+        toastSonner({
+          title: "Processing Error",
+          description: data.message || "There was an error processing your file. Please try again.",
+          variant: "destructive",
+        });
+        setProcessingState('idle');
+        return;
+      }
+
+      if (!response.ok) throw new Error("Upload Failed");
 
       const data = await response.json();
 
