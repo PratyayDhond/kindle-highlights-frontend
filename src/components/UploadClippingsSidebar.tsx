@@ -1,7 +1,7 @@
 import React from "react";
-import { UploadCloud, X } from "lucide-react";
-import { lightFormatters } from "date-fns";
+import { X } from "lucide-react";
 import { toast } from "sonner";
+import FileUpload from "@/components/FileUpload";
 
 interface UploadClippingsSidebarProps {
   lastFile: File | null;
@@ -35,21 +35,6 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
   const handleFileSubmit = () => {
     if (!lastFile) return;
     onFileSubmit();
-  };
-
-  // Handler for file input change
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    if (!file) return;
-    if (file.type !== "text/plain" && !file.name.endsWith(".txt")) {
-      toast.error("Please upload a .txt file.");
-      return;
-    }
-    if (file.size > 16 * 1024 * 1024) {
-      toast.error("File size must be less than 16MB.");
-      return;
-    }
-    setFile(file);
   };
 
   return (
@@ -130,18 +115,11 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
           <span className="text-gray-400">No file uploaded yet.</span>
         )}
       </div>
-      {/* --- Upload Button Section --- */}
-      <label className="flex flex-col items-center bg-royal-500 text-white px-4 py-3 rounded cursor-pointer hover:bg-royal-600 transition-colors shadow-lg font-semibold text-center">
-        <UploadCloud className="mb-1 h-6 w-6" />
-        {isUploading ? "Uploading..." : "Upload Kindle Clippings"}
-        <input
-          type="file"
-          accept=".txt"
-          className="hidden"
-          onChange={handleFileInputChange}
-          disabled={isUploading}
-        />
-      </label>
+      {/* --- Upload Component Section --- */}
+      <FileUpload
+        onFileSelect={setFile}
+        selectedFile={lastFile}
+      />
 
       {/* --- Submit Button Section (only show if file is selected) --- */}
       {lastFile && (
@@ -155,8 +133,7 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
             {isUploading ? "Uploading..." : "Submit File"}
           </button>
           <div className="text-xs text-gray-500 text-center mt-1">
-            Uploading a new Clippings file will cost you{" "}
-            {import.meta.env.VITE_FILE_UPLOAD_COST} coins
+              Uploading a new Clippings file will use 1 coin for each unique book highlighted.
           </div>
         </>
       )}

@@ -6,7 +6,8 @@ import { pdf } from "@react-pdf/renderer";
 import { useNavigate } from "react-router-dom";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import { toast } from "sonner";
-import { profile } from "console";
+import CoinsDashboard from "@/components/CoinsDashboard"; // <-- Import your CoinsDashboard component
+import { useCoins } from "@/context/CoinsContext"; // <-- Import your CoinsContext
 
 interface Book {
   _id: string;
@@ -45,8 +46,12 @@ export default function Dashboard() {
   const [lastFile, setLastFile] = useState<File | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
-  const [search, setSearch] = useState(""); // Add this line for search state
+  const [search, setSearch] = useState("");
+  const [isUploading, setIsUploading] = useState(false); // <-- Add this state
   const navigate = useNavigate();
+
+  // Use CoinsContext for coins state
+  const { coins, setCoins } = useCoins();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -86,37 +91,58 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleUpload = async () => {
-    console.log("Selected file:", lastFile);
-    // if (file) setLastFile(file);
-    const formData = new FormData();
-    formData.append('file', lastFile);
-
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/upload-highlights-file`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-    console.log("Upload response status:", response.status);
-    if (!response.ok) {
-      console.error("Upload failed:", response.statusText);
-      const data = await response.json();
-      toast.error(data.message || "Upload failed. Please try again.");
-      return;
+  useEffect(() => {
+    if (coins === undefined) {
+      // Only fetch if coins is undefined
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/coins`, {
+        credentials: "include",
+      })
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+          if (typeof data.coins === "number") setCoins(data.coins);
+        })
+        .catch(() => {});
     }
-    const data = await response.json();
-    console.log("Upload response:", data);
-    if (data.success) {
-      // Optionally show success message
-      toast.success("File uploaded successfully!");
-      // Fetch updated books after upload
-      const updatedResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
+  }, [coins, setCoins]);
+
+  const handleUpload = async () => {
+    if (!lastFile) return;
+    setIsUploading(true); // Disable the button
+    try {
+      console.log("Selected file:", lastFile);
+
+      const formData = new FormData();
+      formData.append('file', lastFile);
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/upload-highlights-file`, {
+        method: "POST",
+        body: formData,
         credentials: "include",
       });
-      if (!updatedResponse.ok) throw new Error("Failed to fetch updated books");
-      const updatedData = await updatedResponse.json();
-      setBooks(updatedData.books || []);
-      localStorage.setItem("dashboard_books", JSON.stringify(updatedData.books || []));
+      console.log("Upload response status:", response.status);
+      if (!response.ok) {
+        console.error("Upload failed:", response.statusText);
+        const data = await response.json();
+        toast.error(data.message || "Upload failed. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+      const data = await response.json();
+      console.log("Upload response:", data);
+      if (data.success) {
+        setCoins(data.coins)
+        toast.success("File uploaded successfully!");
+        setLastFile(null); // Clear the file input to avoid re-uploading the same file
+        const updatedResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
+          credentials: "include",
+        });
+        if (!updatedResponse.ok) throw new Error("Failed to fetch updated books");
+        const updatedData = await updatedResponse.json();
+        setBooks(updatedData.books || []);
+        localStorage.setItem("dashboard_books", JSON.stringify(updatedData.books || []));
+      }
+    } finally {
+      setIsUploading(false); // Re-enable the button
     }
   };
 
@@ -188,6 +214,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
+      {/* Coins dashboard at the top */}
+      <div className="w-full flex justify-end items-center px-8 pt-6">
+        <CoinsDashboard coins={coins} />
+      </div>
+
       {/* Header placeholder */}
       {/* <div className="h-16 w-full" /> */}
 
@@ -218,7 +249,7 @@ export default function Dashboard() {
               lastFile={lastFile}
               onFileSubmit={handleUpload}
               setFile={setLastFile}
-              isUploading={false}
+              isUploading={isUploading} // <-- Pass this prop
               stats={mockStats}
               showCloseButton={!isDesktop && sidebarOpen}
               onCloseSidebar={() => setSidebarOpen(false)}

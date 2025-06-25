@@ -261,7 +261,7 @@ const Index = () => {
             <Sparkles className="h-6 w-6 text-royal-400 ml-2 animate-pulse" />
           </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Kindle Clippings Processor
+            Kindle Clippings
           </h1>
           <p className="text-lg text-gray-600 max-w-lg mx-auto">
             Transform your Kindle highlights into organized, downloadable formats. 
