@@ -2,6 +2,16 @@ import Footer from "@/components/Footer";
 
 const whatsNewData = [
 	{
+		version: "v2.0.0",
+		date: "2025-06-23",
+		changes: [
+			"Added Dashboard Page.",
+			"Added Book Online View Page.",
+			"Support for Individual Book Download.",
+			"Added User Consent for Data Processing & Storage."
+		]
+	},
+	{
 		version: "v1.2.1",
 		date: "2025-06-20",
 		changes: [
@@ -20,12 +30,12 @@ const whatsNewData = [
 	},
 	{
 		version: "v1.1.0",
-		date: "2025-05-15",
+		date: "2025-06-15",
 		changes: ["Added Authentication Flow."],
 	},
 	{
 		version: "v1.0.0",
-		date: "2025-04-01",
+		date: "2025-06-12",
 		changes: [
 			"File Upload & Processing.",
       "PDF Generation for Highlights.",

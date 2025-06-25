@@ -5,6 +5,8 @@ import BookPdf from "../components/BookPdf";
 import { pdf } from "@react-pdf/renderer";
 import { useNavigate } from "react-router-dom";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
+import { toast } from "sonner";
+import { profile } from "console";
 
 interface Book {
   _id: string;
@@ -84,8 +86,38 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleUpload = (file: File | null) => {
-    if (file) setLastFile(file);
+  const handleUpload = async () => {
+    console.log("Selected file:", lastFile);
+    // if (file) setLastFile(file);
+    const formData = new FormData();
+    formData.append('file', lastFile);
+
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/upload-highlights-file`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+    console.log("Upload response status:", response.status);
+    if (!response.ok) {
+      console.error("Upload failed:", response.statusText);
+      const data = await response.json();
+      toast.error(data.message || "Upload failed. Please try again.");
+      return;
+    }
+    const data = await response.json();
+    console.log("Upload response:", data);
+    if (data.success) {
+      // Optionally show success message
+      toast.success("File uploaded successfully!");
+      // Fetch updated books after upload
+      const updatedResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
+        credentials: "include",
+      });
+      if (!updatedResponse.ok) throw new Error("Failed to fetch updated books");
+      const updatedData = await updatedResponse.json();
+      setBooks(updatedData.books || []);
+      localStorage.setItem("dashboard_books", JSON.stringify(updatedData.books || []));
+    }
   };
 
   // Add this function inside your Dashboard component
@@ -184,7 +216,8 @@ export default function Dashboard() {
           >
             <UploadClippingsSidebar
               lastFile={lastFile}
-              onFileSelect={handleUpload}
+              onFileSubmit={handleUpload}
+              setFile={setLastFile}
               isUploading={false}
               stats={mockStats}
               showCloseButton={!isDesktop && sidebarOpen}
@@ -205,46 +238,55 @@ export default function Dashboard() {
             className="max-w-md w-full mb-8"
           />
           <div className="w-full flex justify-center">
-            <div
-              className={
-                // On mobile: 2 columns if sidebar is closed, 1 column if open. On desktop: always 2/3/4 columns.
-                !isDesktop && !sidebarOpen
-                  ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                  : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-              }
-            >
-              {filteredBooks.map((book) => (
-                <div
-                  key={book._id}
-                  className="bg-white rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[320px] max-h-[380px] max-w-xs w-full"
-                >
-                  <img
-                    src={book.coverUrl || getRandomPlaceholder(book._id)}
-                    alt={book.title}
-                    className="w-24 h-32 object-cover rounded mb-3"
-                  />
-                  <h2 className="text-lg font-semibold text-center line-clamp-2">{book.title}</h2>
-                  <p className="text-xs text-gray-500 mb-2">{book.author}</p>
-                  <div className="flex gap-2 mt-auto">
-                    <button
-                      className="px-3 py-1 rounded bg-royal-100 text-royal-700 hover:bg-royal-200 transition"
-                      onClick={() => handleOpenBook(book._id)}
-                    >
-                      Open
-                    </button>
-                    <button
-                      className="px-3 py-1 rounded bg-royal-500 text-white hover:bg-royal-600 transition"
-                      onClick={() => downloadPdf(book._id, book.title)}
-                    >
-                      Download PDF
-                    </button>
+            {filteredBooks.length === 0 ? (
+              <div className="text-gray-400 text-lg text-center py-20">
+                Your kindle highlights will appear here after uploading 'My Clippings.txt' file.
+              </div>
+            ) : (
+              <div
+                className={
+                  !isDesktop && !sidebarOpen
+                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                    : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                }
+              >
+                {filteredBooks.map((book) => (
+                  <div
+                    key={book._id}
+                    className="bg-white rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[320px] max-h-[380px] max-w-xs w-full"
+                  >
+                    <img
+                      src={book.coverUrl || getRandomPlaceholder(book._id)}
+                      alt={book.title}
+                      className="w-24 h-32 object-cover rounded mb-3"
+                    />
+                    <h2 className="text-lg font-semibold text-center line-clamp-2">{book.title}</h2>
+                    <p className="text-xs text-gray-500 mb-2">{book.author}</p>
+                    <div className="flex gap-2 mt-auto">
+                      <button
+                        className="px-3 py-1 rounded bg-royal-100 text-royal-700 hover:bg-royal-200 transition"
+                        onClick={() => handleOpenBook(book._id)}
+                      >
+                        Open
+                      </button>
+                      <button
+                        className="px-3 py-1 rounded bg-royal-500 text-white hover:bg-royal-600 transition"
+                        onClick={() => downloadPdf(book._id, book.title)}
+                      >
+                        Download PDF
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>
     </div>
   );
 }
+
+
+
+// #todo write backend apis for handling upload of kindle clippings file to be uploaded to user profile.
