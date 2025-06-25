@@ -2,6 +2,7 @@ import React from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
+import Stats from "@/components/Stats"; // Add this import
 
 interface UploadClippingsSidebarProps {
   lastFile: File | null;
@@ -64,27 +65,13 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
 
       {/* --- Metadata Section --- */}
       <div className="mb-4 space-y-2">
-        <div className="font-bold text-royal-700 text-lg">Your Stats</div>
-        <div className="text-sm text-gray-700">
-          Total Books:{" "}
-          <span className="font-semibold">{stats.totalBooks}</span>
-        </div>
-        <div className="text-sm text-gray-700">
-          Total Highlights:{" "}
-          <span className="font-semibold">{stats.totalHighlights}</span>
-        </div>
-        <div className="text-sm text-gray-700">
-          Avg Highlights/Book:{" "}
-          <span className="font-semibold">{stats.avgHighlights}</span>
-        </div>
-        <div className="text-sm text-gray-700">
-          Median Highlights/Book:{" "}
-          <span className="font-semibold">{stats.medianHighlights}</span>
-        </div>
-        <div className="text-sm text-gray-700">
-          Highest Highlights in a Book:{" "}
-          <span className="font-semibold">{stats.maxHighlights}</span>
-        </div>
+        <Stats
+          totalBooks={stats.totalBooks}
+          totalHighlights={stats.totalHighlights}
+          avgHighlights={stats.avgHighlights}
+          medianHighlights={stats.medianHighlights}
+          maxHighlights={stats.maxHighlights}
+        />
       </div>
       {/* --- Last Uploaded File Section --- */}
       <div className="text-xs text-gray-700 text-center">

@@ -216,13 +216,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
       {/* Coins dashboard at the top */}
       <div className="w-full flex justify-end items-center px-8 pt-6">
-        <CoinsDashboard coins={coins} />
+        <CoinsDashboard coins={typeof coins === "number" && !isNaN(coins) ? coins : 0} />
       </div>
 
-      {/* Header placeholder */}
-      {/* <div className="h-16 w-full" /> */}
-
-      {/* Sidebar Toggle Button (below header, only when sidebar is closed on mobile) */}
+      {/* Sidebar Toggle Button (mobile only) */}
       {!sidebarOpen && !isDesktop && (
         <button
           className="absolute top-20 left-4 z-40 bg-transparent border-none p-2 hover:bg-gray-100 transition-colors"
@@ -233,23 +230,27 @@ export default function Dashboard() {
         </button>
       )}
 
-      <div className={`flex flex-1 w-full ${!isDesktop ? "flex-col" : ""} ${isDesktop ? "min-h-[calc(100vh-4rem)]" : ""}`}>
-        {/* Sidebar: 
-            - On desktop: always left
-            - On mobile: top when open, not rendered when closed */}
+      <div className="flex flex-1 w-full flex-col md:flex-row">
+        {/* Sidebar: fixed on desktop, full width on mobile */}
         {((sidebarOpen && !isDesktop) || isDesktop) && (
           <aside
             className={`
-              ${isDesktop ? "relative md:static h-full w-64 min-w-[16rem] border-r border-royal-100" : "w-full"}
-              z-30 bg-white/80 flex flex-col p-6 gap-8
+              ${isDesktop
+                ? "fixed left-0 top-0 h-full w-64 min-w-[16rem] border-r border-royal-100 z-30 bg-white/80 flex flex-col p-6 gap-8"
+                : "w-full z-30 bg-white/80 flex flex-col p-6 gap-8 top-0 left-0"}
               transition-transform duration-300
             `}
+            style={
+              isDesktop
+                ? { boxShadow: "2px 0 8px 0 rgba(0,0,0,0.03)", marginTop: "4.5rem" }
+                : { position: "relative", width: "100%", border: "1px solid #e5e7eb" }
+            }
           >
             <UploadClippingsSidebar
               lastFile={lastFile}
               onFileSubmit={handleUpload}
               setFile={setLastFile}
-              isUploading={isUploading} // <-- Pass this prop
+              isUploading={isUploading}
               stats={mockStats}
               showCloseButton={!isDesktop && sidebarOpen}
               onCloseSidebar={() => setSidebarOpen(false)}
@@ -258,10 +259,13 @@ export default function Dashboard() {
           </aside>
         )}
 
-        {/* Main content */}
-        <main className="flex-1 max-w-7xl mx-auto py-10 px-4 flex flex-col items-center justify-center transition-all duration-300">
+        {/* Main content: add left margin on desktop to make space for fixed sidebar */}
+        <main
+          className={`flex-1 max-w-7xl mx-auto py-10 px-4 flex flex-col items-center justify-center transition-all duration-300
+            ${isDesktop ? "ml-64" : ""}
+          `}
+        >
           <h1 className="text-3xl font-bold mb-8 text-center text-royal-700">Dashboard</h1>
-          {/* Add GlobalSearchBar here */}
           <GlobalSearchBar
             value={search}
             onChange={setSearch}
@@ -317,7 +321,6 @@ export default function Dashboard() {
     </div>
   );
 }
-
 
 
 // #todo write backend apis for handling upload of kindle clippings file to be uploaded to user profile.

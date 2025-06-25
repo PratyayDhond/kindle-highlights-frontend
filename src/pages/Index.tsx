@@ -238,7 +238,7 @@ const Index = () => {
 
       {/* Coins dashboard top right */}
       <div className="absolute top-6 right-8 z-50">
-        <CoinsDashboard coins={coins} />
+        <CoinsDashboard coins={typeof coins === "number" && !isNaN(coins) ? coins : 0} />
       </div>
 
       {/* Dashboard Drawer */}
