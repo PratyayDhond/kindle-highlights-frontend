@@ -2,6 +2,16 @@ import Footer from "@/components/Footer";
 
 const whatsNewData = [
 	{
+		version: "v2.1.0",
+		date: "2025-06-25",
+		changes: [
+			"Added User Stats Prop.",
+			"Notes are now placed at the bottom of the page.",
+			"Fixed Notes/Highlights missing for last highlight in a book.",
+			"Fixed updating of Stats prop on reupload of same file."
+		]
+	},
+	{
 		version: "v2.0.0",
 		date: "2025-06-23",
 		changes: [

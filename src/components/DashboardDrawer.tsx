@@ -1,13 +1,22 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Stats from "@/components/Stats";
 
 interface DashboardDrawerProps {
   open: boolean;
   onClose: () => void;
   onLogout: () => void;
+  stats: {
+    totalBooks: number;
+    totalHighlights: number;
+    avgHighlights: number;
+    maxHighlights: number;
+    updatedAt: Date; 
+  };
 }
 
-const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogout }) => {
+
+const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogout, stats }) => {
   const navigate = useNavigate();
 
   if (!open) return null;
@@ -22,6 +31,9 @@ const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogo
           ✕
         </button>
         <h2 className="text-xl font-bold mb-6">Dashboard</h2>
+        {stats && (
+          <Stats {...stats} />
+        )}
         <button
           onClick={() => {
             navigate("/whats-new");

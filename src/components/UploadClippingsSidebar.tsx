@@ -9,12 +9,12 @@ interface UploadClippingsSidebarProps {
   onFileSubmit: () => void;
   setFile: (file: File | null) => void;
   isUploading?: boolean;
-  stats: {
+  stats?: {
     totalBooks: number;
     totalHighlights: number;
     avgHighlights: number;
-    medianHighlights: number;
     maxHighlights: number;
+    updatedAt: Date;
   };
   onCloseSidebar?: () => void;
   showCloseButton?: boolean;
@@ -65,13 +65,14 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
 
       {/* --- Metadata Section --- */}
       <div className="mb-4 space-y-2">
-        <Stats
-          totalBooks={stats.totalBooks}
-          totalHighlights={stats.totalHighlights}
-          avgHighlights={stats.avgHighlights}
-          medianHighlights={stats.medianHighlights}
-          maxHighlights={stats.maxHighlights}
-        />
+        {stats && (
+          <Stats
+            totalBooks={stats.totalBooks}
+            totalHighlights={stats.totalHighlights}
+            avgHighlights={stats.avgHighlights}
+            maxHighlights={stats.maxHighlights}
+          />
+        )}
       </div>
       {/* --- Last Uploaded File Section --- */}
       <div className="text-xs text-gray-700 text-center">

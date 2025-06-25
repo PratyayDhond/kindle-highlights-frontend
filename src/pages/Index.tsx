@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Sparkles, Menu } from 'lucide-react';
+import { BookOpen, Sparkles, Menu, Component } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProcessingLoader from '@/components/ProcessingLoader';
 import DownloadSection from '@/components/DownloadSection';
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import CoinsDashboard from '@/components/CoinsDashboard';
 import { useCoins } from "@/context/CoinsContext";
+import { useStats } from "@/context/StatsContext";
 import DashboardDrawer from "@/components/DashboardDrawer";
 
 const MAX_FILE_SIZE_MB = import.meta.env.VITE_MAX_FILE_SIZE_MB;
@@ -18,6 +19,7 @@ type ProcessingState = 'idle' | 'processing' | 'completed';
 
 const Index = () => {
   const { coins, setCoins } = useCoins();
+  const { stats, setStats } = useStats();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState>('idle');
   const [isDownloading, setIsDownloading] = useState(false);
@@ -47,6 +49,36 @@ const Index = () => {
     checkBackendHealth();
   }, [toastSonner]);
 
+  useEffect(() => {
+      const fetchStats = async () => {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/stats`, {
+            credentials: "include",
+          });
+          if (!response.ok) throw new Error("Failed to fetch stats");
+          const data = await response.json();
+          setStats(data.stats || {
+            totalBooks: 0,
+            totalHighlights: 0,
+            avgHighlights: 0,
+            medianHighlights: 0,
+            maxHighlights: 0,
+          });
+        } catch (err) {
+          setStats({
+            totalBooks: 0,
+            totalHighlights: 0,
+            avgHighlights: 0,
+            medianHighlights: 0,
+            maxHighlights: 0,
+          });
+        }
+      };
+      console.log(stats);
+      if(!stats)
+        fetchStats();
+    }, [setStats]); // Optionally, you can remove books if you want to fetch only on mount
+  
   useEffect(() => {
     if (coins === undefined) {
       // Only fetch if coins is undefined
@@ -145,6 +177,7 @@ const Index = () => {
       if (typeof data.coins === "number") {
         setCoins(data.coins);
       }
+      setStats(data.stats || null);
 
       setProgress(20);
       setProcessingState('processing');
@@ -246,6 +279,7 @@ const Index = () => {
         open={dashboardOpen}
         onClose={() => setDashboardOpen(false)}
         onLogout={handleLogout}
+        stats={stats}
       />
 
       <div className="w-full max-w-2xl mx-auto">
@@ -354,3 +388,9 @@ const Index = () => {
 };
 
 export default Index;
+
+
+
+// Moved Stats to a different Component
+// CoinsDashboard Number check to avoid NaN
+// Sidebar for Dashboard is fixed now for Desktop

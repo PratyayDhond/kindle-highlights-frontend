@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import VerifyEmail from "@/pages/VerifyEmail";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CoinsProvider } from "@/context/CoinsContext";
+import { StatsProvider } from "@/context/StatsContext";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import WhatsNew from "./pages/WhatsNew";
@@ -20,44 +21,48 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CoinsProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Header />
-          <Routes>
-            {/* <Route path="/" element={<Index />} /> */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/whats-new" element={<WhatsNew />} />
-            <Route 
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-            <Route
-              path="/book/:bookId" 
-              element={
-                <ProtectedRoute>
-                  <BookOnlineView />
-                </ProtectedRoute>                
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        <Footer />
-      </TooltipProvider>
+      <StatsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Header />
+            <Routes>
+              {/* <Route path="/" element={<Index />} /> */}
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/whats-new" element={<WhatsNew />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/book/:bookId"
+                element={
+                  <ProtectedRoute>
+                    <BookOnlineView />
+                  </ProtectedRoute>
+                }
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          <Footer />
+        </TooltipProvider>
+      </StatsProvider>
     </CoinsProvider>
   </QueryClientProvider>
 );

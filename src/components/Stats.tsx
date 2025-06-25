@@ -4,7 +4,6 @@ interface StatsProps {
   totalBooks: number;
   totalHighlights: number;
   avgHighlights: number;
-  medianHighlights: number;
   maxHighlights: number;
 }
 
@@ -12,7 +11,6 @@ const Stats: React.FC<StatsProps> = ({
   totalBooks,
   totalHighlights,
   avgHighlights,
-  medianHighlights,
   maxHighlights,
 }) => (
   <div className="mb-4 space-y-2">
@@ -27,10 +25,7 @@ const Stats: React.FC<StatsProps> = ({
       Avg Highlights/Book: <span className="font-semibold">{avgHighlights}</span>
     </div>
     <div className="text-sm text-gray-700">
-      Median Highlights/Book: <span className="font-semibold">{medianHighlights}</span>
-    </div>
-    <div className="text-sm text-gray-700">
-      Highest Highlights in a Book: <span className="font-semibold">{maxHighlights}</span>
+      Max Highlights in a Book: <span className="font-semibold">{maxHighlights}</span>
     </div>
   </div>
 );

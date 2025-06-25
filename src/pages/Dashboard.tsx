@@ -8,6 +8,7 @@ import GlobalSearchBar from "@/components/GlobalSearchBar";
 import { toast } from "sonner";
 import CoinsDashboard from "@/components/CoinsDashboard"; // <-- Import your CoinsDashboard component
 import { useCoins } from "@/context/CoinsContext"; // <-- Import your CoinsContext
+import { useStats } from "@/context/StatsContext";
 
 interface Book {
   _id: string;
@@ -52,6 +53,38 @@ export default function Dashboard() {
 
   // Use CoinsContext for coins state
   const { coins, setCoins } = useCoins();
+  const { stats, setStats } = useStats();
+
+  // Fetch stats from backend when books change or on mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/stats`, {
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to fetch stats");
+        const data = await response.json();
+        setStats(data.stats || {
+          totalBooks: 0,
+          totalHighlights: 0,
+          avgHighlights: 0,
+          medianHighlights: 0,
+          maxHighlights: 0,
+        });
+      } catch (err) {
+        setStats({
+          totalBooks: 0,
+          totalHighlights: 0,
+          avgHighlights: 0,
+          medianHighlights: 0,
+          maxHighlights: 0,
+        });
+      }
+    };
+    console.log(stats);
+    if(!stats)
+      fetchStats();
+  }, [setStats, books]); // Optionally, you can remove books if you want to fetch only on mount
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -131,6 +164,7 @@ export default function Dashboard() {
       console.log("Upload response:", data);
       if (data.success) {
         setCoins(data.coins)
+        setStats(data.stats)
         toast.success("File uploaded successfully!");
         setLastFile(null); // Clear the file input to avoid re-uploading the same file
         const updatedResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
@@ -251,7 +285,7 @@ export default function Dashboard() {
               onFileSubmit={handleUpload}
               setFile={setLastFile}
               isUploading={isUploading}
-              stats={mockStats}
+              stats={stats}
               showCloseButton={!isDesktop && sidebarOpen}
               onCloseSidebar={() => setSidebarOpen(false)}
               isDesktop={isDesktop}
