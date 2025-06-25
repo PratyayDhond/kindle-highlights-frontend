@@ -1,11 +1,19 @@
 import React from "react";
+import { useAnimatedNumber } from "./useAnimatedNumber";
 
-const CoinsDashboard = ({ coins = 0 }: { coins?: number }) => (
-  <div className=" text-yellow-900 px-4 py-2 rounded-full shadow-lg flex items-center space-x-2">
+interface CoinsDashboardProps {
+  coins: number;
+}
+
+const CoinsDashboard: React.FC<CoinsDashboardProps> = ({ coins }) => {
+  const animatedCoins = useAnimatedNumber(coins, 600); // 600ms animation
+
+  return (
+    <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded shadow text-royal-700 font-semibold">
     <span role="img" aria-label="coins">🪙</span>
-    <span className="font-bold">{coins}</span>
-    <span className="text-xs font-semibold">Coins</span>
-  </div>
-);
+      <span>{animatedCoins}</span>
+    </div>
+  );
+};
 
 export default CoinsDashboard;

@@ -8,7 +8,9 @@ const whatsNewData = [
 			"Added Dashboard Page.",
 			"Added Book Online View Page.",
 			"Support for Individual Book Download.",
-			"Added User Consent for Data Processing & Storage."
+			"Added User Consent for Data Processing & Storage.",
+			"Search functionality for Books and Highlights in a selected book.",
+			"Added Coins Update Animation"
 		]
 	},
 	{
