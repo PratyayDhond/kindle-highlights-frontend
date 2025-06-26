@@ -23,14 +23,6 @@ interface Book {
   }[];
 }
 
-const mockStats = {
-  totalBooks: 5,
-  totalHighlights: 42,
-  avgHighlights: 8.4,
-  medianHighlights: 7,
-  maxHighlights: 15,
-};
-
 // Add this helper function at the top (outside the component)
 function getRandomPlaceholder(bookId: string, total = 4) {
   // Deterministic: always same placeholder for same book
@@ -68,16 +60,16 @@ export default function Dashboard() {
           totalBooks: 0,
           totalHighlights: 0,
           avgHighlights: 0,
-          medianHighlights: 0,
           maxHighlights: 0,
+          updatedAt: new Date(),
         });
       } catch (err) {
         setStats({
           totalBooks: 0,
           totalHighlights: 0,
           avgHighlights: 0,
-          medianHighlights: 0,
           maxHighlights: 0,
+          updatedAt: new Date(),
         });
       }
     };

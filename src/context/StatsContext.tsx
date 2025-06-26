@@ -4,8 +4,8 @@ export interface Stats {
   totalBooks: number;
   totalHighlights: number;
   avgHighlights: number;
-  medianHighlights: number;
   maxHighlights: number;
+  updatedAt: Date;
 }
 
 

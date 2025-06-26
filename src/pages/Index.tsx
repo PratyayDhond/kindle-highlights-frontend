@@ -61,16 +61,16 @@ const Index = () => {
             totalBooks: 0,
             totalHighlights: 0,
             avgHighlights: 0,
-            medianHighlights: 0,
             maxHighlights: 0,
+            updatedAt: new Date(),
           });
         } catch (err) {
           setStats({
             totalBooks: 0,
             totalHighlights: 0,
             avgHighlights: 0,
-            medianHighlights: 0,
             maxHighlights: 0,
+            updatedAt: new Date(),
           });
         }
       };
