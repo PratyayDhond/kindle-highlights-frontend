@@ -186,7 +186,10 @@ export default function Dashboard() {
 
       if (!response.ok) throw new Error("Failed to fetch book PDF");
       const data = await response.json();
-      console.log("Book PDF data:", data.book);
+      console.log(data)
+      // console.log("Book PDF data:", data.book);
+      if(data.coins)
+        setCoins(data.coins);
       const blob = await pdf(
         <BookPdf
           title={data.book.title}
@@ -207,8 +210,8 @@ export default function Dashboard() {
       // Or, if your backend returns a redirect or a direct PDF URL, you can use:
       // window.open(`${import.meta.env.VITE_BACKEND_URL}/user/book/${encodeURIComponent(bookId)}`, "_blank");
     } catch (err) {
-      // Optionally show a toast or alert
-      alert("Failed to download PDF.");
+      toast.error("Failed to download PDF.");
+      console.error("Download error:", err);
     }
   };
 
@@ -227,7 +230,7 @@ export default function Dashboard() {
       // Navigate to /book/:bookId and pass book data as state
       navigate(`/book/${bookId}`, { state: { book: data.book } });
     } catch (err) {
-      alert("Failed to open book.");
+      toast.error("Failed to open book.");
     }
   };
 
