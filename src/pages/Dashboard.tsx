@@ -73,7 +73,7 @@ export default function Dashboard() {
         });
       }
     };
-    console.log(stats);
+    // console.log(stats);
     if(!stats)
       fetchStats();
   }, [setStats, books]); // Optionally, you can remove books if you want to fetch only on mount
@@ -134,7 +134,7 @@ export default function Dashboard() {
     if (!lastFile) return;
     setIsUploading(true); // Disable the button
     try {
-      console.log("Selected file:", lastFile);
+      // console.log("Selected file:", lastFile);
 
       const formData = new FormData();
       formData.append('file', lastFile);
@@ -144,7 +144,7 @@ export default function Dashboard() {
         body: formData,
         credentials: "include",
       });
-      console.log("Upload response status:", response.status);
+      // console.log("Upload response status:", response.status);
       if (!response.ok) {
         console.error("Upload failed:", response.statusText);
         const data = await response.json();
@@ -153,7 +153,7 @@ export default function Dashboard() {
         return;
       }
       const data = await response.json();
-      console.log("Upload response:", data);
+      // console.log("Upload response:", data);
       if (data.success) {
         setCoins(data.coins)
         setStats(data.stats)
@@ -186,7 +186,7 @@ export default function Dashboard() {
 
       if (!response.ok) throw new Error("Failed to fetch book PDF");
       const data = await response.json();
-      console.log(data)
+      // console.log(data)
       // console.log("Book PDF data:", data.book);
       if(data.coins)
         setCoins(data.coins);
@@ -227,6 +227,21 @@ export default function Dashboard() {
       );
       if (!response.ok) throw new Error("Failed to fetch book data");
       const data = await response.json();
+
+      data.book.highlights.sort((a, b) => {
+      
+      if (a.location.start !== b.location.start) {
+        return a.location.start - b.location.start;
+      }
+      // Keep notes before highlights if at the same location
+      if (a.type !== b.type) {
+        return a.type.localeCompare(b.type);
+      }
+      // If still equal, sort by timestamp
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+    });
+
+
       // Navigate to /book/:bookId and pass book data as state
       navigate(`/book/${bookId}`, { state: { book: data.book } });
     } catch (err) {

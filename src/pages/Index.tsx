@@ -74,7 +74,7 @@ const Index = () => {
           });
         }
       };
-      console.log(stats);
+      // console.log(stats);
       if(!stats)
         fetchStats();
     }, [setStats]); // Optionally, you can remove books if you want to fetch only on mount

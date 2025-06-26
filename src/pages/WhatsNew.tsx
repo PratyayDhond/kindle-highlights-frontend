@@ -2,6 +2,14 @@ import Footer from "@/components/Footer";
 
 const whatsNewData = [
 	{
+		version: "v2.1.1",
+		date: "2025-06-26",
+		changes: [
+			"Notes are placed at the location they were created at",
+			"Fixed Coins not being updated after highlights file uploaded from dashboard"
+		]
+	},
+	{
 		version: "v2.1.0",
 		date: "2025-06-25",
 		changes: [
