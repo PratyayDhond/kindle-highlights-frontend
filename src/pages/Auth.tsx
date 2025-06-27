@@ -64,6 +64,7 @@ const Auth = () => {
       if (typeof data.coins === "number") {
         setCoins(data.coins);
       }
+      localStorage.setItem("submitted_file_hashes", JSON.stringify([]));
       toast.success("Login successful!");
       navigate("/");
     } catch (err) {
