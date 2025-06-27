@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import CoinsDashboard from "@/components/CoinsDashboard"; // <-- Import your CoinsDashboard component
 import { useCoins } from "@/context/CoinsContext"; // <-- Import your CoinsContext
 import { useStats } from "@/context/StatsContext";
+import { useToast } from '@/hooks/use-toast';
 
 interface Book {
   _id: string;
@@ -34,6 +35,14 @@ function getRandomPlaceholder(bookId: string, total = 4) {
   return `/book-cover-placeholders/${hash + 1}.png`;
 }
 
+// Add this helper function at the top of your file
+async function calculateFileHash(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export default function Dashboard() {
   const [books, setBooks] = useState<Book[]>([]);
   const [lastFile, setLastFile] = useState<File | null>(null);
@@ -42,6 +51,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [isUploading, setIsUploading] = useState(false); // <-- Add this state
   const navigate = useNavigate();
+  const { toast: toastSonner } = useToast();
 
   // Use CoinsContext for coins state
   const { coins, setCoins } = useCoins();
@@ -132,10 +142,54 @@ export default function Dashboard() {
 
   const handleUpload = async () => {
     if (!lastFile) return;
-    setIsUploading(true); // Disable the button
-    try {
-      // console.log("Selected file:", lastFile);
+    setIsUploading(true);
 
+    try {
+      // Calculate hash of the file
+      const fileHash = await calculateFileHash(lastFile);
+
+      // Get all previously submitted hashes from localStorage (as an array)
+      const hashesRaw = localStorage.getItem("submitted_file_hashes");
+      let submittedHashes: string[] = [];
+      if (hashesRaw) {
+        try {
+          submittedHashes = JSON.parse(hashesRaw);
+        } catch {
+          submittedHashes = [];
+        }
+      }
+
+      // Check if the hash matches any previously submitted hash
+      if (submittedHashes.includes(fileHash)) {
+        toastSonner({
+          title: "Duplicate File",
+          description: "You submitted this file recently.",
+          variant: "destructive",
+        });
+        setIsUploading(false);
+        setLastFile(null);
+        return;
+      }
+
+      if(!lastFile.name.endsWith(".txt")) {
+        toastSonner({
+          title: "Invalid File",
+          description: "Please upload a .txt file.",
+          variant: "destructive",
+        });
+        setLastFile(null);
+        return;
+      }
+      if( lastFile.size > import.meta.env.VITE_MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toastSonner({
+          title: "File Too Large",
+          description: `Please upload a file smaller than ${import.meta.env.VITE_MAX_FILE_SIZE_MB} MB.`,
+          variant: "destructive",
+        });
+        setLastFile(null);
+        return;
+      }
+      
       const formData = new FormData();
       formData.append('file', lastFile);
 
@@ -145,27 +199,73 @@ export default function Dashboard() {
         credentials: "include",
       });
       // console.log("Upload response status:", response.status);
-      if (!response.ok) {
+
+      const updatedHashes = [...submittedHashes, fileHash];
+      localStorage.setItem("submitted_file_hashes", JSON.stringify(updatedHashes));
+
+      if (response.status === 402) {
+        const data = await response.json();
+        toastSonner({
+          title: "Not enough coins",
+          description: data.message || "You do not have enough coins to process these books.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if(response.status === 418){
+        const data = await response.json();
+        toastSonner({
+          title: "Processing Error",
+          description: data.message || "There was an error processing your file. Please try again.",
+          variant: "destructive",
+        });
+        setLastFile(null);
+        return;
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Add the new hash to the array and update localStorage
+          setCoins(data.coins)
+          setStats(data.stats)
+          toast.success("File uploaded successfully!");
+          setLastFile(null);
+          const updatedResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
+            credentials: "include",
+          });
+          if (!updatedResponse.ok) throw new Error("Failed to fetch updated books");
+          const updatedData = await updatedResponse.json();
+          setBooks(updatedData.books || []);
+          localStorage.setItem("dashboard_books", JSON.stringify(updatedData.books || []));
+        }
+      } else {
+        // ...existing error handling...
+        if (response.status === 402) {
+          const data = await response.json();
+          toastSonner({
+            title: "Not enough coins",
+            description: data.message || "You do not have enough coins to process these books.",
+            variant: "destructive",
+          });
+          return;
+        }
+        if(response.status === 418){
+          const data = await response.json();
+          toastSonner({
+            title: "Processing Error",
+            description: data.message || "There was an error processing your file. Please try again.",
+            variant: "destructive",
+          });
+          setLastFile(null);
+          return;
+        }
         console.error("Upload failed:", response.statusText);
         const data = await response.json();
         toast.error(data.message || "Upload failed. Please try again.");
         setIsUploading(false);
         return;
-      }
-      const data = await response.json();
-      // console.log("Upload response:", data);
-      if (data.success) {
-        setCoins(data.coins)
-        setStats(data.stats)
-        toast.success("File uploaded successfully!");
-        setLastFile(null); // Clear the file input to avoid re-uploading the same file
-        const updatedResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
-          credentials: "include",
-        });
-        if (!updatedResponse.ok) throw new Error("Failed to fetch updated books");
-        const updatedData = await updatedResponse.json();
-        setBooks(updatedData.books || []);
-        localStorage.setItem("dashboard_books", JSON.stringify(updatedData.books || []));
       }
     } finally {
       setIsUploading(false); // Re-enable the button

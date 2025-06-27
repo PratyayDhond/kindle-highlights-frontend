@@ -167,6 +167,7 @@ const Index = () => {
           variant: "destructive",
         });
         setProcessingState('idle');
+        setSelectedFile(null);
         return;
       }
 
