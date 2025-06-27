@@ -381,6 +381,17 @@ const Index = () => {
           <p className="text-sm text-gray-500">
             Your files are processed securely and never stored on our servers without your consent.
           </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold">No Clippings.txt file? No problem. </span>
+             Try the app using our{" "}
+            <a
+              href="/My Clippings.txt"
+              download="My Clippings.txt"
+              className="text-royal-500 hover:underline"
+            >
+              Sample File
+            </a>.
+          </p>
         </div>
       </div>
     </div>
