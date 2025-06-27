@@ -6,7 +6,9 @@ const whatsNewData = [
 		date: "2025-06-26",
 		changes: [
 			"Notes are placed at the location they were created at",
-			"Fixed Coins not being updated after highlights file uploaded from dashboard"
+			"Fixed Coins not being updated after highlights file uploaded from dashboard",
+			"Added File hashing to check for duplicate file uploads by user.",
+			"Added sample file for users without clippings.txt"
 		]
 	},
 	{
