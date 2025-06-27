@@ -5,6 +5,7 @@ const whatsNewData = [
 		version: "v2.1.1",
 		date: "2025-06-26",
 		changes: [
+			"Users can not switch to Google SSO login after setting initial email-password login.",
 			"Notes are placed at the location they were created at",
 			"Fixed Coins not being updated after highlights file uploaded from dashboard",
 			"Added File hashing to check for duplicate file uploads by user.",
