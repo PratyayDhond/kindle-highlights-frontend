@@ -21,6 +21,13 @@ const Newsletter: React.FC = () => {
         toast.success(data.message || "You have successfully subscribed to the daily highlights newsletter!");
       } else {
         setSubscribed(false);
+        console.log(response);
+        if(response.status === 400 && data.message === "User already subscribed to newsletter") {
+          setConsent(false);
+          setSubscribed(true);
+          toast.info("You are already subscribed to the newsletter.");
+          return;
+        }
         toast.error(data.message || "Something went wrong.");
       }
     } catch {
