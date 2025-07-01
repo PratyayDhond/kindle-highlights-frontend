@@ -15,6 +15,8 @@ import Header from "@/components/Header";
 import WhatsNew from "./pages/WhatsNew";
 import Dashboard from "./pages/Dashboard";
 import BookOnlineView from "./pages/BookOnlineView";
+import Newsletter from "@/pages/Newsletter";
+import Unsubscribe from "@/pages/Unsubscribe";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,22 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <BookOnlineView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/newsletter"
+                element={
+                  <ProtectedRoute>
+                    <Newsletter />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/newsletter/unsubscribe"
+                element={
+                  <ProtectedRoute>
+                    <Unsubscribe />
                   </ProtectedRoute>
                 }
               />

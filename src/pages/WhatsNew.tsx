@@ -2,10 +2,22 @@ import Footer from "@/components/Footer";
 
 const whatsNewData = [
 	{
+		version: "v3.0.0 - Newsletter",
+		date: "2025-07-02",
+		changes: [
+			"Added Newsletter feature.",
+			"Users can now subscribe to newsletters.",
+			"cron job to send newsletters every day.",
+			"Newsletter consists of 10 random users highlights.",
+			"Updated Header to be scrollable for mobile devices.",
+			"Updated Home on Header to (Kindle Highlights -> Zip) tool.",
+		]
+	},
+	{
 		version: "v2.1.1",
 		date: "2025-06-26",
 		changes: [
-			"Users can not switch to Google SSO login after setting initial email-password login.",
+			"Users can now switch to Google SSO login after setting initial email-password login.",
 			"Notes are placed at the location they were created at",
 			"Fixed Coins not being updated after highlights file uploaded from dashboard",
 			"Added File hashing to check for duplicate file uploads by user.",
@@ -23,7 +35,7 @@ const whatsNewData = [
 		]
 	},
 	{
-		version: "v2.0.0",
+		version: "v2.0.0 - Dashboard",
 		date: "2025-06-23",
 		changes: [
 			"Added Dashboard Page.",
@@ -57,7 +69,7 @@ const whatsNewData = [
 		changes: ["Added Authentication Flow."],
 	},
 	{
-		version: "v1.0.0",
+		version: "v1.0.0 - Highlights Extractor",
 		date: "2025-06-12",
 		changes: [
 			"File Upload & Processing.",
