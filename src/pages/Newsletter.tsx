@@ -18,6 +18,7 @@ const Newsletter: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         setSubscribed(true);
+        setConsent(false); // Reset consent after successful subscription
         toast.success(data.message || "You have successfully subscribed to the daily highlights newsletter!");
       } else {
         setSubscribed(false);

@@ -2,8 +2,16 @@ import Footer from "@/components/Footer";
 
 const whatsNewData = [
 	{
-		version: "v3.0.0 - Newsletter",
+		version: "v3.1.0",
 		date: "2025-07-02",
+		changes: [
+			"Newsletter not sent now if no user highlights are available.",
+			"Newsletter includes a dynamic highlight count if user has less than 10 highlights."
+		]
+	},
+	{
+		version: "v3.0.0 - Newsletter",
+		date: "2025-07-01",
 		changes: [
 			"Added Newsletter feature.",
 			"Users can now subscribe to newsletters.",

@@ -18,6 +18,7 @@ const Unsubscribe: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         setUnsubscribed(true);
+        setConsent(false); // Reset consent after successful unsubscription
         toast.success(data.message || "You have been unsubscribed from the daily highlights newsletter.");
       } else {
         setUnsubscribed(false);
