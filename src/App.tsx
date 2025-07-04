@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import BookOnlineView from "./pages/BookOnlineView";
 import Newsletter from "@/pages/Newsletter";
 import Unsubscribe from "@/pages/Unsubscribe";
+import { UserProvider } from "@/context/UserContext";
 
 const queryClient = new QueryClient();
 
@@ -24,62 +25,64 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <CoinsProvider>
       <StatsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Header />
-            <Routes>
-              {/* <Route path="/" element={<Index />} /> */}
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/whats-new" element={<WhatsNew />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/book/:bookId"
-                element={
-                  <ProtectedRoute>
-                    <BookOnlineView />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/newsletter"
-                element={
-                  <ProtectedRoute>
-                    <Newsletter />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/newsletter/unsubscribe"
-                element={
-                  <ProtectedRoute>
-                    <Unsubscribe />
-                  </ProtectedRoute>
-                }
-              />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-          <Footer />
-        </TooltipProvider>
+        <UserProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Header />
+              <Routes>
+                {/* <Route path="/" element={<Index />} /> */}
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/whats-new" element={<WhatsNew />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/book/:bookId"
+                  element={
+                    <ProtectedRoute>
+                      <BookOnlineView />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/newsletter"
+                  element={
+                    <ProtectedRoute>
+                      <Newsletter />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/newsletter/unsubscribe"
+                  element={
+                    <ProtectedRoute>
+                      <Unsubscribe />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <Footer />
+          </TooltipProvider>
+        </UserProvider>
       </StatsProvider>
     </CoinsProvider>
   </QueryClientProvider>

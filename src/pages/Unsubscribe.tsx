@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { useUser } from "@/context/UserContext"; // <-- import UserContext
 
 const Unsubscribe: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [unsubscribed, setUnsubscribed] = useState<boolean | null>(null);
   const [consent, setConsent] = useState(false);
+  const { user } = useUser(); // <-- get user
 
   const handleUnsubscribe = async () => {
     setLoading(true);
@@ -41,7 +43,7 @@ const Unsubscribe: React.FC = () => {
     <div className="min-h-[85vh] flex flex-col items-center justify-center px-4">
       <h1 className="text-3xl font-bold mb-4 text-royal-700">Unsubscribe from Newsletter</h1>
       <p className="mb-6 text-gray-600 text-center max-w-md">
-        We're sorry to see you go! Click below to opt out of the daily highlights newsletter.
+        {user?.name ? ` ${user.name}, we're sorry to see you go!` : "We're sorry to see you go!"} Click below to opt out of the daily highlights newsletter for '{user?.email}'.
       </p>
       <form
         className="flex flex-col gap-4 w-full max-w-sm"

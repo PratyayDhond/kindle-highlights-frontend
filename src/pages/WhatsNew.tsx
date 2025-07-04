@@ -7,6 +7,8 @@ const whatsNewData = [
 		changes: [
 			"Updated Redundant Highlights removal logic to avoid issue of overlapping dissimilar highlights.",
 			"Added quick-navigation shortcut keys across app.",
+			"Added Username display in dashboard",
+			"Updated Newsletter message to show email address of user.",
 			"Shortcut Keys: ",
 			"`CTRL + F` to focus search bar",
 			"`CTRL + Backspace` to go back from Book View to Dashboard",

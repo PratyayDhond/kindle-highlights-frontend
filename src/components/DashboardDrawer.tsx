@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/context/UserContext";
 import Stats from "@/components/Stats";
 
 interface DashboardDrawerProps {
@@ -18,6 +19,7 @@ interface DashboardDrawerProps {
 
 const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogout, stats }) => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   if (!open) return null;
 
@@ -30,7 +32,13 @@ const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogo
         >
           ✕
         </button>
-        <h2 className="text-xl font-bold mb-6">Dashboard</h2>
+        {/* User Info */}
+        {user && (
+          <div className="mb-6">
+            <div className="text-lg font-semibold text-royal-700">Hello {user.name ? user.name : "Book Lover"}</div>
+            <div className="text-xs text-gray-500 break-all">{user.email}</div>
+          </div>
+        )}
         {stats && (
           <Stats {...stats} />
         )}

@@ -5,9 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { useCoins } from "@/context/CoinsContext";
+import { useUser } from "@/context/UserContext"; // <-- import useUser
 
 const Auth = () => {
   const { setCoins } = useCoins();
+  const { setUser } = useUser(); // <-- get setUser from context
   const navigate = useNavigate();
   const [authMode, setAuthMode] = useState<"main" | "login" | "signup">("main");
 
@@ -157,7 +159,7 @@ const Auth = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ token: credentialResponse.credential }),
-        credentials: "include", // <-- This is required!
+        credentials: "include",
       });
       const data = await response.json();
       if (!response.ok) {
@@ -172,6 +174,11 @@ const Auth = () => {
         if (typeof data.coins === "number") {
           setCoins(data.coins);
         }
+        // Directly update user context with received data
+        setUser({
+          name: data.firstName,
+          email: data.email,
+        });
         toast.success(data.message || "Login successful!");
         navigate("/");
       }

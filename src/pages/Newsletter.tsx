@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { useUser } from "@/context/UserContext"; // <-- import useUser
 
 const Newsletter: React.FC = () => {
   const [consent, setConsent] = useState(false);
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const { user } = useUser(); // <-- get user from context
 
   const handleSubscribe = async () => {
     setLoading(true);
@@ -72,13 +74,18 @@ const Newsletter: React.FC = () => {
           {loading ? "Subscribing..." : "Subscribe"}
         </button>
       </form>
-      <blockquote className="mt-8 mb-6 italic text-gray-500 max-w-md border-l-4 border-royal-300 pl-4 text-sm">
+      <blockquote className="mt-8 mb-2 italic text-gray-500 max-w-md border-l-4 border-royal-300 pl-4 text-sm">
         “The next best thing to the enjoyment of a good time is the recollection of it.”
         <br />
         <span className="block mt-2 text-xs text-gray-400 not-italic mr-6 text-right">
           — James Lendall Basford
         </span>
       </blockquote>
+      <div className="text-xs text-gray-500 max-w-md mb-6 text-center">
+        {user?.email
+          ? `The newsletter will be sent to ${user.email}.`
+          : ""}
+      </div>
     </div>
   );
 };
