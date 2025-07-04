@@ -2,6 +2,19 @@ import Footer from "@/components/Footer";
 
 const whatsNewData = [
 	{
+		version: "v3.2.0",
+		date: "2025-07-04",
+		changes: [
+			"Updated Redundant Highlights removal logic to avoid issue of overlapping dissimilar highlights.",
+			"Added quick-navigation shortcut keys across app.",
+			"Shortcut Keys: ",
+			"`CTRL + F` to focus search bar",
+			"`CTRL + Backspace` to go back from Book View to Dashboard",
+			"`Enter` to Open book view when only 1 search result exists",
+			"`SHIFT + D` to download book pdf when only 1 search result"
+		]
+	},
+	{
 		version: "v3.1.0",
 		date: "2025-07-02",
 		changes: [

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import UploadClippingsSidebar from "@/components/UploadClippingsSidebar";
 import { Menu } from "lucide-react";
 import BookPdf from "../components/BookPdf";
@@ -52,6 +52,7 @@ export default function Dashboard() {
   const [isUploading, setIsUploading] = useState(false); // <-- Add this state
   const navigate = useNavigate();
   const { toast: toastSonner } = useToast();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Use CoinsContext for coins state
   const { coins, setCoins } = useCoins();
@@ -356,6 +357,35 @@ export default function Dashboard() {
       book.author.toLowerCase().includes(search.toLowerCase())
   );
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if search is focused or not empty
+      if (filteredBooks.length === 1) {
+        // Enter key: open book
+        if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          handleOpenBook(filteredBooks[0]._id);
+        }
+        // Shift+D: download PDF
+        if ((e.key === "d" || e.key === "D") && e.shiftKey) {
+          e.preventDefault();
+          downloadPdf(filteredBooks[0]._id, filteredBooks[0].title);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [filteredBooks]); // Re-run if filteredBooks changes
+
+  useEffect(() => {
+    // Focus the search bar on desktop only (not Android)
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    console.log(isAndroid)
+    if (isDesktop && !isAndroid && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isDesktop]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
       {/* Coins dashboard at the top */}
@@ -415,6 +445,7 @@ export default function Dashboard() {
             onChange={setSearch}
             placeholder="Search books by title or author..."
             className="max-w-md w-full mb-8"
+            inputRef={searchInputRef} // Pass the ref to the search bar
           />
           <div className="w-full flex justify-center">
             {filteredBooks.length === 0 ? (

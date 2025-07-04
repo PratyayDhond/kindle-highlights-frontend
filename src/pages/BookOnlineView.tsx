@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 
 export default function BookOnlineView() {
@@ -8,6 +8,17 @@ export default function BookOnlineView() {
   const navigate = useNavigate();
   const { book } = location.state || {};
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Backspace") {
+        e.preventDefault();
+        navigate("/dashboard");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
 
   if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
 
