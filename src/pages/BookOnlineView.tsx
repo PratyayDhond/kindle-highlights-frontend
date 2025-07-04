@@ -11,7 +11,8 @@ export default function BookOnlineView() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Backspace") {
+      // Check for Ctrl+Shift+Backspace or Cmd+Shift+Backspace
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "Backspace") {
         e.preventDefault();
         navigate("/dashboard");
       }

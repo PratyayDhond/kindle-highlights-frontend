@@ -11,7 +11,7 @@ const whatsNewData = [
 			"Updated Newsletter message to show email address of user.",
 			"Shortcut Keys: ",
 			"`CTRL + F` to focus search bar",
-			"`CTRL + Backspace` to go back from Book View to Dashboard",
+			"`CTRL + SHIFT + Backspace` to go back from Book View to Dashboard",
 			"`Enter` to Open book view when only 1 search result exists",
 			"`SHIFT + D` to download book pdf when only 1 search result"
 		]
