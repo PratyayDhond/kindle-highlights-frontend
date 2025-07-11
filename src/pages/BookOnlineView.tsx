@@ -8,6 +8,9 @@ export default function BookOnlineView() {
   const navigate = useNavigate();
   const { book } = location.state || {};
   const [search, setSearch] = useState("");
+  const [showHighlights, setShowHighlights] = useState(true);
+  const [showNotes, setShowNotes] = useState(true);
+  const [showQuotes, setShowQuotes] = useState(true); // <-- Add this line
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -23,13 +26,19 @@ export default function BookOnlineView() {
 
   if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
 
-  // Filter highlights by search keyword (case-insensitive)
+  // Filter highlights by search keyword (case-insensitive) and checkbox state
   const filteredHighlights =
-    book.highlights && search
-      ? book.highlights.filter((hl: any) =>
-          hl.highlight.toLowerCase().includes(search.toLowerCase())
-        )
-      : book.highlights;
+    book.highlights
+      ? book.highlights.filter((hl: any) => {
+          const matchesSearch = search
+            ? hl.highlight.toLowerCase().includes(search.toLowerCase())
+            : true;
+          const matchesType =
+            (showHighlights && hl.type === "highlight") ||
+            (showNotes && hl.type === "note");
+          return matchesSearch && matchesType;
+        })
+      : [];
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4">
@@ -49,6 +58,41 @@ export default function BookOnlineView() {
         onChange={setSearch}
         placeholder="Search highlights..."
       />
+      {/* Checkboxes for filtering */}
+      <div className="flex gap-6 items-center mb-6 mt-2 justify-center">
+        <label className="flex items-center gap-2">
+          Show results for: 
+          <input
+            type="checkbox"
+            checked={showHighlights}
+            onChange={() => setShowHighlights((v) => !v)}
+            className="accent-royal-600"
+          />
+          <span>Highlights</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showNotes}
+            onChange={() => setShowNotes((v) => !v)}
+            className="accent-royal-600"
+          />
+          <span>Notes</span>
+        </label>
+      </div>
+      {/* View filter checkboxes */}
+      <div className="flex gap-6 items-center mb-6 justify-center">
+        <span className="text-gray-600">View filter:</span>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showQuotes}
+            onChange={() => setShowQuotes((v) => !v)}
+            className="accent-royal-600"
+          />
+          <span>Enable double-quotes ("") in output</span>
+        </label>
+      </div>
       <div className="space-y-6 min-h-[60vh]">
         {filteredHighlights && filteredHighlights.length > 0 ? (
           (() => {
@@ -73,7 +117,9 @@ export default function BookOnlineView() {
                   <div className="text-xs text-royal-600 font-semibold mb-1">
                     {label}
                   </div>
-                  <div className="text-gray-800 text-base mb-2">"{hl.highlight}"</div>
+                  <div className="text-gray-800 text-base mb-2">
+                    {showQuotes ? `"${hl.highlight}"` : hl.highlight}
+                  </div>
                   <div className="text-xs text-gray-500 flex gap-4">
                     {hl.page && (
                       <span>Page: {hl.page} </span>
