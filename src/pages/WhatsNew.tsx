@@ -7,6 +7,7 @@ const whatsNewData = [
 		date: "2025-07-15",
 		changes: [
 			"Added Strict Punctuation and Show Quotes options in Book Online View -> View Filters.",
+			"Added URL filtering to show highlighted working urls only from a book."
 		]
 		
 	},

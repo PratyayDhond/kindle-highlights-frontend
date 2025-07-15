@@ -10,6 +10,7 @@ export default function BookOnlineView() {
   const [search, setSearch] = useState("");
   const [showHighlights, setShowHighlights] = useState(true);
   const [showNotes, setShowNotes] = useState(true);
+  const [showUrlsOnly, setShowUrlsOnly] = useState(true);
   const [showQuotes, setShowQuotes] = useState(true);
   const [isViewFilterOpen, setIsViewFilterOpen] = useState(false);
   const [strictPunctuation, setStrictPunctuation] = useState(false);
@@ -26,7 +27,68 @@ export default function BookOnlineView() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [navigate]);
 
+  // Add URL detection useEffect
+  useEffect(() => {
+    if (book && book.highlights) {
+      book.highlights.forEach((hl: any) => {
+        // when you make const urlRegex outside of the loop, it will return incorrect results for highlights that contain URLs.
+        // This is because the regex is not re-evaluated for each highlight.
+        // Instead, we define it inside the loop to ensure it checks each highlight individually.
+        /**
+         * The issue is that urlRegex.test() has a stateful behavior with the global flag (g).
+         * When you call test() multiple times on the same regex object, it maintains an internal lastIndex 
+            position and continues searching from where it left off.
+         */
+        const urlRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
+        hl.containsUrl = urlRegex.test(hl.highlight);
+      });
+    }
+  }, [book]);
+
   if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
+
+  // Function to make URLs clickable
+  const makeUrlsClickable = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
+    const parts = text.split(urlRegex);
+    console.log(parts)
+    return parts.map((part, index) => {
+      const testRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
+      if (testRegex.test(part)) {
+        // Add https:// prefix if the URL starts with www.
+
+        if(showQuotes && part.endsWith('"'))
+          part = part.slice(0, -1); // Remove trailing quote for URL processing
+        if(strictPunctuation && part.endsWith('.'))
+          part = part.slice(0, -1); // Remove trailing period for URL processing
+
+        console.log(part)
+        const href = part.startsWith('www.') ? `https://${part}` : part;
+        return (
+          <a
+            key={index}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            {part} 
+          </a>
+        );
+      }
+      if(index === 0 && showQuotes && !part.startsWith('"')) {
+        part = `"${part}`; // Add opening quote if not present
+      }
+      if(index === parts.length - 1 ){
+        if(strictPunctuation && !part.endsWith('.')) {
+          part += '.'; // Add period if strict punctuation is enabled and not present
+        }
+        if(showQuotes && !part.endsWith('"'))
+          part += '"'; // Add closing quote if not present
+      }
+      return part;
+    });
+  };
 
   // Filter highlights by search keyword (case-insensitive) and checkbox state
   const filteredHighlights =
@@ -37,7 +99,8 @@ export default function BookOnlineView() {
             : true;
           const matchesType =
             (showHighlights && hl.type === "highlight") ||
-            (showNotes && hl.type === "note");
+            (showNotes && hl.type === "note") ||
+            (showUrlsOnly && hl.containsUrl);
           return matchesSearch && matchesType;
         })
       : [];
@@ -80,6 +143,15 @@ export default function BookOnlineView() {
             className="accent-royal-600"
           />
           <span>Notes</span>
+        </label>
+                <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showUrlsOnly}
+            onChange={() => setShowUrlsOnly((v) => !v)}
+            className="accent-royal-600"
+          />
+          <span>Urls</span>
         </label>
       </div>
       {/* View filter checkboxes */}
@@ -156,8 +228,15 @@ export default function BookOnlineView() {
                         if (strictPunctuation && !endsWithPunctuation) {
                           text = `${hl.highlight}.`;
                         }
-                          
-                        return showQuotes ? `"${text}"` : text;
+                        
+                        const finalText = text;
+                        
+                        // If contains URL, make links clickable
+                        if (hl.containsUrl) {
+                          return <span>{makeUrlsClickable(finalText)}</span>;
+                        }
+                        
+                        return finalText;
                       })()
                     }
                   </div>
