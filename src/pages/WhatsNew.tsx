@@ -1,6 +1,15 @@
 import Footer from "@/components/Footer";
+import { version } from "os";
 
 const whatsNewData = [
+	{
+		version: "v3.2.1",
+		date: "2025-07-15",
+		changes: [
+			"Added Strict Punctuation and Show Quotes options in Book Online View -> View Filters.",
+		]
+		
+	},
 	{
 		version: "v3.2.0",
 		date: "2025-07-04",

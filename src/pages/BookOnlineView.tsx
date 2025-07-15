@@ -10,7 +10,9 @@ export default function BookOnlineView() {
   const [search, setSearch] = useState("");
   const [showHighlights, setShowHighlights] = useState(true);
   const [showNotes, setShowNotes] = useState(true);
-  const [showQuotes, setShowQuotes] = useState(true); // <-- Add this line
+  const [showQuotes, setShowQuotes] = useState(true);
+  const [isViewFilterOpen, setIsViewFilterOpen] = useState(false);
+  const [strictPunctuation, setStrictPunctuation] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -81,17 +83,44 @@ export default function BookOnlineView() {
         </label>
       </div>
       {/* View filter checkboxes */}
-      <div className="flex gap-6 items-center mb-6 justify-center">
-        <span className="text-gray-600">View filter:</span>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={showQuotes}
-            onChange={() => setShowQuotes((v) => !v)}
-            className="accent-royal-600"
-          />
-          <span>Enable double-quotes ("") in output</span>
-        </label>
+      <div className="mb-6 justify-center">
+        <button
+          onClick={() => setIsViewFilterOpen(!isViewFilterOpen)}
+          className="flex items-center gap-2 text-royal-600 hover:text-royal-800 transition-colors mx-auto"
+        >
+          <span className="text-gray-600">View filter</span>
+          <svg
+            className={`w-4 h-4 transition-transform ${isViewFilterOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {isViewFilterOpen && (
+          <div className="flex gap-6 items-center mt-3 justify-center">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showQuotes}
+                onChange={() => setShowQuotes((v) => !v)}
+                className="accent-royal-600"
+              />
+              <span>Enable double-quotes ("") in output</span>
+            </label>
+            <br />
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={strictPunctuation}
+                onChange={() => setStrictPunctuation((v) => !v)}
+                className="accent-royal-600"
+              />
+              <span>Add punctuation (.) to all quotes without one. </span>
+            </label>
+          </div>
+        )}
       </div>
       <div className="space-y-6 min-h-[60vh]">
         {filteredHighlights && filteredHighlights.length > 0 ? (
@@ -118,7 +147,19 @@ export default function BookOnlineView() {
                     {label}
                   </div>
                   <div className="text-gray-800 text-base mb-2">
-                    {showQuotes ? `"${hl.highlight}"` : hl.highlight}
+                    { 
+                      (() => {
+                        const punctuationMarks = ['.', '!', '?', ';', ':', '…'];
+                        const endsWithPunctuation = punctuationMarks.some(mark => hl.highlight.endsWith(mark));
+                        
+                        let text = hl.highlight;
+                        if (strictPunctuation && !endsWithPunctuation) {
+                          text = `${hl.highlight}.`;
+                        }
+                          
+                        return showQuotes ? `"${text}"` : text;
+                      })()
+                    }
                   </div>
                   <div className="text-xs text-gray-500 flex gap-4">
                     {hl.page && (
