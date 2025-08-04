@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { ArrowLeft, Pencil, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
+import EditHighlightModal from "@/components/EditHighlightModal";
 
 export default function BookOnlineView() {
   const location = useLocation();
@@ -14,6 +15,12 @@ export default function BookOnlineView() {
   const [showQuotes, setShowQuotes] = useState(true);
   const [isViewFilterOpen, setIsViewFilterOpen] = useState(false);
   const [strictPunctuation, setStrictPunctuation] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingHighlight, setEditingHighlight] = useState<any>(null);
+
+  // Refs for scroll management
+  const highlightRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -94,6 +101,8 @@ export default function BookOnlineView() {
   const filteredHighlights =
     book.highlights
       ? book.highlights.filter((hl: any) => {
+          // This checks and filters through the current active highlight
+          const isActive = hl.knowledge_end_date === null
           const matchesSearch = search
             ? hl.highlight.toLowerCase().includes(search.toLowerCase())
             : true;
@@ -101,12 +110,148 @@ export default function BookOnlineView() {
             (showHighlights && hl.type === "highlight") ||
             (showNotes && hl.type === "note") ||
             (showUrlsOnly && hl.containsUrl);
-          return matchesSearch && matchesType;
+          return isActive && matchesSearch && matchesType;
         })
       : [];
 
+  // Handle delete highlight
+  const handleDelete = (index: number) => {
+    if (window.confirm("Are you sure you want to delete this highlight?")) {
+      // TODO: Implement delete API call
+      console.log("Deleting highlight at index:", index);
+    }
+  };
+
+  // Handle edit highlight
+  const handleEdit = (index: number, highlight: any) => {
+    setEditingHighlight({ ...highlight, index });
+    setIsEditModalOpen(true);
+  };
+
+  // Handle save edit
+  const handleSaveEdit = (updatedHighlight: any) => {
+    if (editingHighlight && book.highlights) {
+      // TODO: Implement API call to update highlight
+      console.log("Saving edit:", updatedHighlight);
+      
+      // For now, update locally (replace with API call)
+      book.highlights[editingHighlight.index] = {
+        ...book.highlights[editingHighlight.index],
+        ...updatedHighlight,
+      };
+      
+      setIsEditModalOpen(false);
+      setEditingHighlight(null);
+    }
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setIsEditModalOpen(false);
+    setEditingHighlight(null);
+  };
+
+  // Cache management functions
+  const getScrollCacheKey = (bookTitle: string) => {
+    return `book_scroll_position_${bookTitle.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  };
+
+  const saveScrollPosition = (highlightIndex: number) => {
+    if (book?.title) {
+      const cacheKey = getScrollCacheKey(book.title);
+      localStorage.setItem(cacheKey, highlightIndex.toString());
+    }
+  };
+
+  const getScrollPosition = (): number | null => {
+    if (book?.title) {
+      const cacheKey = getScrollCacheKey(book.title);
+      const saved = localStorage.getItem(cacheKey);
+      return saved ? parseInt(saved) : null;
+    }
+    return null;
+  };
+
+  // Scroll to saved position when component mounts and data is ready
+  useEffect(() => {
+    if (book && filteredHighlights && filteredHighlights.length > 0) {
+      const savedPosition = getScrollPosition();
+      
+      if (savedPosition !== null && savedPosition < filteredHighlights.length) {
+        // Scroll to saved position
+        setTimeout(() => {
+          const element = highlightRefs.current[savedPosition];
+          if (element) {
+            element.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }
+        }, 100); // Small delay to ensure DOM is ready
+      } else {
+        // Scroll to top if no saved position
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 100);
+      }
+    }
+  }, [book, filteredHighlights]);
+
+  // Track scroll position and save to cache
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!filteredHighlights || filteredHighlights.length === 0) return;
+
+      // Find the highlight that's currently most visible
+      let visibleHighlight = 0;
+      const windowHeight = window.innerHeight;
+      const scrollTop = window.pageYOffset;
+
+      for (let i = 0; i < filteredHighlights.length; i++) {
+        const element = highlightRefs.current[i];
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const elementTop = rect.top + scrollTop;
+          
+          // If element is in viewport or passed it
+          if (elementTop <= scrollTop + windowHeight / 2) {
+            visibleHighlight = i;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Debounce saving to avoid excessive localStorage writes
+      const timeoutId = setTimeout(() => {
+        saveScrollPosition(visibleHighlight);
+      }, 1000); // Save after 1 second of no scrolling
+
+      return () => clearTimeout(timeoutId);
+    };
+
+    // Throttle scroll events
+    let ticking = false;
+    const throttledScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', throttledScroll);
+    return () => {
+      window.removeEventListener('scroll', throttledScroll);
+    };
+  }, [filteredHighlights]);
+
+  // Set ref for each highlight
+  const setHighlightRef = (index: number) => (el: HTMLDivElement | null) => {
+    highlightRefs.current[index] = el;
+  };
+
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4">
+    <div className="max-w-3xl mx-auto py-10 px-4" ref={containerRef}>
       {/* Go Back Icon */}
       <button
         className="mb-6 flex items-center text-royal-600 hover:text-royal-800 transition-colors"
@@ -212,11 +357,32 @@ export default function BookOnlineView() {
               return (
                 <div
                   key={idx}
+                  ref={setHighlightRef(idx)}
                   className="bg-white rounded-lg shadow p-4 border-l-4 border-royal-400"
                 >
-                  {/* Counter for highlight/note */}
-                  <div className="text-xs text-royal-600 font-semibold mb-1">
-                    {label}
+                  {/* Header with counter and action buttons */}
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="text-xs text-royal-600 font-semibold">
+                      {label}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(idx, hl)}
+                        className="text-gray-500 hover:text-blue-600 transition-colors p-1"
+                        title="Edit highlight"
+                        aria-label="Edit highlight"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(idx)}
+                        className="text-gray-500 hover:text-red-600 transition-colors p-1"
+                        title="Delete highlight"
+                        aria-label="Delete highlight"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <div className="text-gray-800 text-base mb-2">
                     { 
@@ -269,9 +435,22 @@ export default function BookOnlineView() {
             });
           })()
         ) : (
-          <div className="text-center text-gray-400">No highlights found for this book.</div>
+          <div className="text-center py-20">
+            <p className="text-gray-500 text-lg">No highlights found.</p>
+            <p className="text-gray-400 text-sm mt-2">
+              {search ? "Try adjusting your search or filters." : "This book has no highlights yet."}
+            </p>
+          </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      <EditHighlightModal
+        isOpen={isEditModalOpen}
+        highlight={editingHighlight}
+        onSave={handleSaveEdit}
+        onCancel={handleCancelEdit}
+      />
     </div>
   );
 }
