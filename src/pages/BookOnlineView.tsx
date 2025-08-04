@@ -158,7 +158,7 @@ export default function BookOnlineView() {
 
   const saveScrollPosition = (highlightIndex: number) => {
     if (book?.title) {
-      const cacheKey = getScrollCacheKey(book.title);
+      const cacheKey = getScrollCacheKey(book.title); 
       localStorage.setItem(cacheKey, highlightIndex.toString());
     }
   };
@@ -365,6 +365,7 @@ export default function BookOnlineView() {
                     <div className="text-xs text-royal-600 font-semibold">
                       {label}
                     </div>
+                    {/* TODO: Uncomment when backend functionality is implemented
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(idx, hl)}
@@ -383,6 +384,7 @@ export default function BookOnlineView() {
                         <X className="w-4 h-4" />
                       </button>
                     </div>
+                    */}
                   </div>
                   <div className="text-gray-800 text-base mb-2">
                     { 
