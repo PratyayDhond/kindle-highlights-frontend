@@ -2,20 +2,20 @@ import Footer from "@/components/Footer";
 import { version } from "os";
 
 const whatsNewData = [
+	// {
+	// 	version: "v3.2.3",
+	// 	date: "2025-07-23",
+	// 	changes: [
+	// 		"Added Option to Delete Highlights/Notes from Book Online View.",
+	// 		"Added Option to Update Notes/Highlights from Book Online View.",
+	// 		"Added version history for highlights in Book Online View."
+	// 	]
+	// },
 	{
-		version: "v3.2.4",
+		version: "v3.2.2",
 		date: "2025-08-05",
 		changes: [
 			"Start reading where you left off, Online Book View now remembers the last highlight viewed.",
-		]
-	},
-	{
-		version: "v3.2.2",
-		date: "2025-07-23",
-		changes: [
-			"Added Option to Delete Highlights/Notes from Book Online View.",
-			"Added Option to Update Notes/Highlights from Book Online View.",
-			"Added version history for highlights in Book Online View."
 		]
 	},
 	{
