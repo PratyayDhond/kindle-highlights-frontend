@@ -1,8 +1,30 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil, X } from "lucide-react";
+import { ArrowLeft, Pencil, X, Package, CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import EditHighlightModal from "@/components/EditHighlightModal";
+
+interface Highlight {
+  _id: string;
+  highlight: string;
+  type: "highlight" | "note";
+  page?: number;
+  location: { start: number; end: number };
+  timestamp?: string;
+  containsUrl?: boolean;
+  knowledge_begin_date: string;
+  knowledge_end_date?: string;
+}
+
+// Staging area types
+interface StagedOperation {
+  id: string;
+  type: 'edit' | 'delete';
+  highlightId: string;
+  originalHighlight: Highlight;
+  updatedHighlight?: Partial<Highlight>;
+  timestamp: string;
+}
 
 export default function BookOnlineView() {
   const location = useLocation();
@@ -17,10 +39,47 @@ export default function BookOnlineView() {
   const [strictPunctuation, setStrictPunctuation] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingHighlight, setEditingHighlight] = useState<any>(null);
+  const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
+
+  // Staging area state
+  const [stagingArea, setStagingArea] = useState<StagedOperation[]>([]);
+  const [showStagingArea, setShowStagingArea] = useState(false);
+  const [isCommitting, setIsCommitting] = useState(false);
+
+  // Add a flag to track if initial scroll has happened
+  const [hasInitialScrolled, setHasInitialScrolled] = useState(false);
 
   // Refs for scroll management
   const highlightRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load staging area from localStorage on component mount
+  useEffect(() => {
+    if (book?._id) {
+      const saved = localStorage.getItem(`staging_${book._id}`);
+      if (saved) {
+        try {
+          setStagingArea(JSON.parse(saved));
+        } catch {
+          // Corrupted data, ignore
+        }
+      }
+    }
+  }, [book?._id]);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Save staging area to localStorage whenever it changes
+  useEffect(() => {
+    if (book?._id) {
+      localStorage.setItem(`staging_${book._id}`, JSON.stringify(stagingArea));
+    }
+  }, [stagingArea, book?._id]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,7 +157,7 @@ export default function BookOnlineView() {
   };
 
   // Filter highlights by search keyword (case-insensitive) and checkbox state
-  const filteredHighlights =
+  var filteredHighlights =
     book.highlights
       ? book.highlights.filter((hl: any) => {
           // This checks and filters through the current active highlight
@@ -114,42 +173,225 @@ export default function BookOnlineView() {
         })
       : [];
 
-  // Handle delete highlight
-  const handleDelete = (index: number) => {
-    if (window.confirm("Are you sure you want to delete this highlight?")) {
-      // TODO: Implement delete API call
-      console.log("Deleting highlight at index:", index);
+  // Add operation to staging area
+  const addToStagingArea = (operation: Omit<StagedOperation, 'id' | 'timestamp'>) => {
+    const stagedOp: StagedOperation = {
+      ...operation,
+      id: `${operation.type}_${operation.highlightId}_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+    };
+    
+    setStagingArea(prev => {
+      // Remove any existing operations for the same highlight
+      const filtered = prev.filter(op => op.highlightId !== operation.highlightId);
+      return [...filtered, stagedOp];
+    });
+  };
+
+  // Remove operation from staging area
+  const removeFromStagingArea = (operationId: string) => {
+    setStagingArea(prev => prev.filter(op => op.id !== operationId));
+  };
+
+  // Clear staging area
+  const clearStagingArea = () => {
+    setStagingArea([]);
+    if (book?._id) {
+      localStorage.removeItem(`staging_${book._id}`);
     }
   };
 
+  // Handle delete highlight - add to staging
+  const handleDelete = (index: number, highlight: Highlight) => {
+      addToStagingArea({
+        type: 'delete',
+        highlightId: highlight._id,
+        originalHighlight: highlight,
+      });
+      console.log("Highlight staged for deletion:", highlight);
+  };
+
   // Handle edit highlight
-  const handleEdit = (index: number, highlight: any) => {
+  const handleEdit = (index: number, highlight: Highlight) => {
     setEditingHighlight({ ...highlight, index });
     setIsEditModalOpen(true);
   };
 
-  // Handle save edit
+  // Handle save edit - add to staging
   const handleSaveEdit = (updatedHighlight: any) => {
-    if (editingHighlight && book.highlights) {
-      // TODO: Implement API call to update highlight
-      console.log("Saving edit:", updatedHighlight);
-      
-      // For now, update locally (replace with API call)
-      book.highlights[editingHighlight.index] = {
-        ...book.highlights[editingHighlight.index],
-        ...updatedHighlight,
-      };
+    if (editingHighlight) {
+      addToStagingArea({
+        type: 'edit',
+        highlightId: editingHighlight._id,
+        originalHighlight: editingHighlight,
+        updatedHighlight: updatedHighlight,
+      });
       
       setIsEditModalOpen(false);
       setEditingHighlight(null);
+      console.log("Highlight staged for edit:", updatedHighlight);
     }
   };
 
-  // Handle cancel edit
-  const handleCancelEdit = () => {
-    setIsEditModalOpen(false);
-    setEditingHighlight(null);
+  // Commit all staged operations
+  const commitStagedOperations = async () => {
+    if (stagingArea.length === 0) return;
+    
+    setIsCommitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/book/${book._id}/batch-update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          operations: stagingArea,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to commit changes');
+
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+      
+      // Update local cached data based on successful operations
+      if (responseData.results && responseData.results.successful && responseData.results.successful.length > 0) {
+        console.log('Going inside updateLocalBookData')
+        updateLocalBookData(responseData.results.successful);
+      }
+      
+      // Handle failed operations
+      if (responseData.results && responseData.results.failed && responseData.results.failed.length > 0) {
+        handleFailedOperations(responseData.results.failed);
+      }
+      
+      // Clear staging area on success (or partial success)
+      clearStagingArea();
+      
+      // Show success/partial success message
+      if (responseData.results.successCount === responseData.totalOperations) {
+        console.log(`Successfully committed all ${responseData.results.successCount} operations`);
+        // toast.success(`Successfully updated ${responseData.results.successCount} highlights`);
+      } else {
+        console.log(`Committed ${responseData.results.successCount}/${responseData.results.totalOperations} operations`);
+        // toast.warning(`Updated ${responseData.results.successCount} of ${responseData.totalOperations} highlights`);
+      }
+      
+    } catch (error) {
+      console.error('Failed to commit staged operations:', error);
+      // toast.error('Failed to commit changes. Please try again.');
+    } finally {
+      setIsCommitting(false);
+    }
   };
+
+  // Function to update local book data based on successful operations
+  const updateLocalBookData = (successfulOperations: any[]) => {
+    if (!book || !book.highlights) return;
+    console.log("successfulOperations:", successfulOperations);
+    successfulOperations.forEach((successOp) => {
+      const { operationId, highlightId, type } = successOp;
+      
+      // Find the corresponding staged operation
+      const stagedOp = stagingArea.find(op => op.id === operationId);
+      if (!stagedOp) return;
+      
+      // Find the highlight in the local book data
+      const highlightIndex = book.highlights.findIndex(hl => hl._id === highlightId);
+      if (highlightIndex === -1) return;
+      
+      if (type === 'edit' && stagedOp.updatedHighlight) {
+        // Update the highlight with the new data
+        book.highlights[highlightIndex] = {
+          ...book.highlights[highlightIndex],
+          ...stagedOp.updatedHighlight,
+        };
+        
+        console.log(`Updated highlight ${highlightId} locally`);
+        
+      } else if (type === 'delete') {
+        // For soft delete, update the knowledge_end_date
+        book.highlights[highlightIndex] = {
+          ...book.highlights[highlightIndex],
+          knowledge_end_date: new Date().toISOString(),
+        };
+        
+        console.log(`Soft deleted highlight ${highlightId} locally`);
+      }
+    });
+    console.log("Calling updateBookCache")
+    // Update the book cache in localStorage if you're using it
+    updateBookCache(book);
+    
+    // Force re-render by updating a state that triggers filteredHighlights recalculation
+    // You might need to add a refresh trigger state
+    // setHasInitialScrolled(false); // This will trigger useEffect to re-calculate filtered highlights
+  };
+
+  // Function to handle failed operations
+  const handleFailedOperations = (failedOperations: any[]) => {
+    failedOperations.forEach((failedOp) => {
+      console.error(`Operation ${failedOp.operationId} failed:`, failedOp.message);
+    });
+    
+
+    // #todo
+    // Add a toast error message for each failed operation giving the reason why it failed
+    // Optionally, you could keep failed operations in staging area
+    // or show detailed error messages to the user
+  };
+
+  // Function to update book cache in localStorage
+  const updateBookCache = (updatedBook: any) => {
+    try {
+      // Update individual book cache
+      const bookCacheKey = `book_${updatedBook._id}`;
+      localStorage.setItem(bookCacheKey, JSON.stringify(updatedBook));
+    } catch (error) {
+      console.error('Failed to update book cache:', error);
+    }
+  };
+
+  // Check if a highlight is staged for deletion
+  const isHighlightStaged = (highlightId: string): StagedOperation | null => {
+    return stagingArea.find(op => op.highlightId === highlightId) || null;
+  };
+
+  // Get the effective highlight data (with staged edits applied)
+  const getEffectiveHighlight = (highlight: Highlight): Highlight => {
+    const stagedOp = stagingArea.find(op => 
+      op.highlightId === highlight._id && op.type === 'edit'
+    );
+    
+    if (stagedOp?.updatedHighlight) {
+      return { ...highlight, ...stagedOp.updatedHighlight };
+    }
+    
+    return highlight;
+  };
+
+  // Filter highlights (exclude staged deletions)
+  var filteredHighlights = book.highlights
+    ? book.highlights
+        .filter((hl: any) => {
+          // Exclude highlights staged for deletion
+          const stagedOp = isHighlightStaged(hl._id);
+          if (stagedOp?.type === 'delete') return false;
+          
+          // Apply existing filters
+          const isActive = hl.knowledge_end_date === null;
+          const matchesSearch = search
+            ? hl.highlight.toLowerCase().includes(search.toLowerCase())
+            : true;
+          const matchesType =
+            (showHighlights && hl.type === "highlight") ||
+            (showNotes && hl.type === "note") ||
+            (showUrlsOnly && hl.containsUrl);
+          return isActive && matchesSearch && matchesType;
+        })
+        .map((hl: any) => getEffectiveHighlight(hl)) // Apply staged edits
+    : [];
 
   // Cache management functions
   const getScrollCacheKey = (bookTitle: string) => {
@@ -174,7 +416,7 @@ export default function BookOnlineView() {
 
   // Scroll to saved position when component mounts and data is ready
   useEffect(() => {
-    if (book && filteredHighlights && filteredHighlights.length > 0) {
+    if (book && filteredHighlights && filteredHighlights.length > 0 && !hasInitialScrolled) {
       const savedPosition = getScrollPosition();
       
       if (savedPosition !== null && savedPosition < filteredHighlights.length) {
@@ -184,15 +426,17 @@ export default function BookOnlineView() {
           if (element) {
             element.scrollIntoView({ behavior: 'auto', block: 'start' });
           }
-        }, 100); // Small delay to ensure DOM is ready
+          setHasInitialScrolled(true); // Mark as scrolled
+        }, 100);
       } else {
         // Scroll to top if no saved position
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'auto' });
+          setHasInitialScrolled(true); // Mark as scrolled
         }, 100);
       }
     }
-  }, [book, filteredHighlights]);
+  }, [book, filteredHighlights, hasInitialScrolled]);
 
   // Track scroll position and save to cache
   useEffect(() => {
@@ -222,7 +466,7 @@ export default function BookOnlineView() {
       // Debounce saving to avoid excessive localStorage writes
       const timeoutId = setTimeout(() => {
         saveScrollPosition(visibleHighlight);
-      }, 1000); // Save after 1 second of no scrolling
+      }, 1000);
 
       return () => clearTimeout(timeoutId);
     };
@@ -252,15 +496,119 @@ export default function BookOnlineView() {
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4" ref={containerRef}>
-      {/* Go Back Icon */}
-      <button
-        className="mb-6 flex items-center text-royal-600 hover:text-royal-800 transition-colors"
-        onClick={() => navigate("/dashboard")}
-        aria-label="Go back to dashboard"
-      >
-        <ArrowLeft className="w-5 h-5 mr-2" />
-        <span className="font-medium">Back to Dashboard</span>
-      </button>
+      {/* Header with Back button and Staging area toggle */}
+      <div className="flex justify-between items-center mb-6">
+        <button
+          className="flex items-center text-royal-600 hover:text-royal-800 transition-colors"
+          onClick={() => navigate("/dashboard")}
+          aria-label="Go back to dashboard"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span className="font-medium">Back to Dashboard</span>
+        </button>
+        
+        {/* Staging area button */}
+        <button
+          onClick={() => setShowStagingArea(!showStagingArea)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+            stagingArea.length > 0 
+              ? 'border-orange-300 bg-orange-50 text-orange-700' 
+              : 'border-gray-300 text-gray-600'
+          }`}
+        >
+          <Package className="w-4 h-4" />
+          <span>Staging ({stagingArea.length})</span>
+        </button>
+      </div>
+
+      {/* Staging Area Panel */}
+      {showStagingArea && (
+        <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-semibold text-gray-800">Staging Area</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={clearStagingArea}
+                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100"
+                disabled={stagingArea.length === 0}
+              >
+                Clear All
+              </button>
+              <button
+                onClick={commitStagedOperations}
+                disabled={stagingArea.length === 0 || isCommitting}
+                className="px-3 py-1 text-sm bg-royal-600 text-white rounded hover:bg-royal-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                {isCommitting ? (
+                  <>
+                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                    Committing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-3 h-3" />
+                    Commit All Changes ({stagingArea.length})
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          
+          {stagingArea.length === 0 ? (
+            <p className="text-gray-500 text-sm">No pending changes</p>
+          ) : (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {stagingArea.map((op) => (
+                <div
+                  key={op.id}
+                  className={`p-3 rounded border-l-4 ${
+                    op.type === 'delete' 
+                      ? 'border-red-400 bg-red-50' 
+                      : 'border-blue-400 bg-blue-50'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                          op.type === 'delete' 
+                            ? 'bg-red-200 text-red-800' 
+                            : 'bg-blue-200 text-blue-800'
+                        }`}>
+                          {op.type.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(op.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 line-clamp-2">
+                        {op.type === 'edit' 
+                          ? op.updatedHighlight?.highlight || op.originalHighlight.highlight
+                          : op.originalHighlight.highlight
+                        }
+                      </p>
+                      {op.type === 'edit' && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Original: {isDesktop ? op.originalHighlight.highlight.substring(0,255) + (op.originalHighlight.highlight.length > 255 ? '...' : '') : op.originalHighlight.highlight.substring(0, 50) + '...'}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => removeFromStagingArea(op.id)}
+                      className="text-gray-400 hover:text-red-600 ml-2"
+                      title="Remove from staging"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Rest of existing JSX with book title, search, filters, etc. */}
       <h1 className="text-3xl font-bold text-royal-700 mb-2 text-center">{book.title}</h1>
       <h2 className="text-lg text-gray-600 mb-8 text-center">by {book.author}</h2>
       <GlobalSearchBar
@@ -339,13 +687,16 @@ export default function BookOnlineView() {
           </div>
         )}
       </div>
+      {/* Highlights list with staging indicators */}
       <div className="space-y-6 min-h-[60vh]">
         {filteredHighlights && filteredHighlights.length > 0 ? (
           (() => {
             let highlightCount = 0;
             let noteCount = 0;
             return filteredHighlights.map((hl: any, idx: number) => {
-              // Assume hl.type is either "highlight" or "note"
+              const stagedOp = isHighlightStaged(hl._id);
+              
+              // Counter logic
               let label = "Highlight";
               if (hl.type === "note") {
                 noteCount += 1;
@@ -354,18 +705,35 @@ export default function BookOnlineView() {
                 highlightCount += 1;
                 label = `Highlight ${highlightCount}`;
               }
+              
               return (
                 <div
-                  key={idx}
+                  key={hl._id || idx}
                   ref={setHighlightRef(idx)}
-                  className="bg-white rounded-lg shadow p-4 border-l-4 border-royal-400"
+                  className={`bg-white rounded-lg shadow p-4 border-l-4 relative ${
+                    stagedOp 
+                      ? stagedOp.type === 'edit' 
+                        ? 'border-blue-400 bg-blue-50/30' 
+                        : 'border-orange-400'
+                      : 'border-royal-400'
+                  }`}
                 >
+                  {/* Staging indicator */}
+                  {stagedOp && (
+                    <div className={`absolute top-2 right-2 px-2 py-1 text-xs rounded ${
+                      stagedOp.type === 'edit' 
+                        ? 'bg-blue-200 text-blue-800' 
+                        : 'bg-orange-200 text-orange-800'
+                    }`}>
+                      {stagedOp.type === 'edit' ? 'EDITED' : 'DELETED'}
+                    </div>
+                  )}
+                  
                   {/* Header with counter and action buttons */}
                   <div className="flex justify-between items-center mb-1">
                     <div className="text-xs text-royal-600 font-semibold">
                       {label}
                     </div>
-                    {/* TODO: Uncomment when backend functionality is implemented
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(idx, hl)}
@@ -376,7 +744,7 @@ export default function BookOnlineView() {
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(idx)}
+                        onClick={() => handleDelete(idx, hl)}
                         className="text-gray-500 hover:text-red-600 transition-colors p-1"
                         title="Delete highlight"
                         aria-label="Delete highlight"
@@ -384,7 +752,6 @@ export default function BookOnlineView() {
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    */}
                   </div>
                   <div className="text-gray-800 text-base mb-2">
                     { 
@@ -451,7 +818,10 @@ export default function BookOnlineView() {
         isOpen={isEditModalOpen}
         highlight={editingHighlight}
         onSave={handleSaveEdit}
-        onCancel={handleCancelEdit}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          setEditingHighlight(null);
+        }}
       />
     </div>
   );
