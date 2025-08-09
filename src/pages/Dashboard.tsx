@@ -10,6 +10,8 @@ import CoinsDashboard from "@/components/CoinsDashboard"; // <-- Import your Coi
 import { useCoins } from "@/context/CoinsContext"; // <-- Import your CoinsContext
 import { useStats } from "@/context/StatsContext";
 import { useToast } from '@/hooks/use-toast';
+import RefreshButton from "@/components/RefreshButton";
+import {useUser} from "@/context/UserContext";
 
 interface Book {
   _id: string;
@@ -23,6 +25,19 @@ interface Book {
     timeStamp: string;
   }[];
 }
+
+const dashboard_cache_configurations = [ 
+  {
+    cacheKey: 'dashboard_books',
+    apiUrl: `${import.meta.env.VITE_BACKEND_URL}/user/books`,
+    dataPath: 'books'
+  },
+  {
+    cacheKey: 'dashboard_stats',
+    apiUrl: `${import.meta.env.VITE_BACKEND_URL}/user/stats`,
+    dataPath: 'stats'
+  }
+]
 
 // Add this helper function at the top (outside the component)
 function getRandomPlaceholder(bookId: string, total = 4) {
@@ -53,6 +68,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { toast: toastSonner } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useUser(); // <-- get user from context
 
   // Use CoinsContext for coins state
   const { coins, setCoins } = useCoins();
@@ -61,7 +77,22 @@ export default function Dashboard() {
   // Fetch stats from backend when books change or on mount
   useEffect(() => {
     const fetchStats = async () => {
+      
+      if(!user || !user.id) {
+        return;
+      }
+
+      // Read from local storage first
+      const cachedStats = localStorage.getItem(user.id + "_stats");
+      if (cachedStats) {
+        console.log("Fetched `stats` from cache");
+        setStats(JSON.parse(cachedStats));
+        return;
+      }
+
       try {
+        // This API call is to be made if user is new or the cache is empty.
+        console.log("Making API Call to stats api")
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/stats`, {
           credentials: "include",
         });
@@ -74,6 +105,9 @@ export default function Dashboard() {
           maxHighlights: 0,
           updatedAt: new Date(),
         });
+
+        const userStatsCacheKey = user.id + "_stats";
+        localStorage.setItem(userStatsCacheKey, JSON.stringify(data.stats));
       } catch (err) {
         setStats({
           totalBooks: 0,
@@ -84,41 +118,54 @@ export default function Dashboard() {
         });
       }
     };
-    // console.log(stats);
-    if(!stats)
-      fetchStats();
-  }, [setStats, books]); // Optionally, you can remove books if you want to fetch only on mount
+
+    fetchStats();
+  }, [user]); // Initially the user seems to be null as it is being set through authentication flow at UserContext.
 
   useEffect(() => {
     const fetchBooks = async () => {
+
+      if(!user || !user.id) {
+        return;
+      }
       // Try to get books from localStorage cache first
-      const cached = localStorage.getItem("dashboard_books");
+      const dashboardBooksCacheKey = user.id + "_dashboard_books";
+      const cached = localStorage.getItem(dashboardBooksCacheKey);
+      let booksLength = 0
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
           setBooks(parsed);
-        } catch {
+          booksLength = parsed.length;
+          console.log("Fetched `books` from cache");
+        } catch (e) {
+          console.log("Failed to parse cached books", e);
+          setBooks([]);
         }
       }
-      // This request is not that costly so we should allow it for all users.
-      // The following backend request is to fetch only the books and author for users
+
+      if (booksLength > 0) return; // Avoid fetching if we already have books
+
       // Fetch from backend if not in cache
       try {
+        console.log("Fetching books from API endpoint - Failed to fetch from cache");
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
           credentials: "include",
         });
         if (!response.ok) throw new Error("Failed to fetch books");
         const data = await response.json();
         setBooks(data.books || []);
-        localStorage.setItem("dashboard_books", JSON.stringify(data.books || []));
+        if(data.books && Array.isArray(data.books)) {
+          localStorage.setItem(dashboardBooksCacheKey, JSON.stringify(data.books));
+        }
       } catch (err) {
         // Optionally handle error (show toast, etc.)
         setBooks([]);
       }
     };
 
-    fetchBooks();
-  }, []);
+      fetchBooks();
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
@@ -239,7 +286,7 @@ export default function Dashboard() {
           if (!updatedResponse.ok) throw new Error("Failed to fetch updated books");
           const updatedData = await updatedResponse.json();
           setBooks(updatedData.books || []);
-          localStorage.setItem("dashboard_books", JSON.stringify(updatedData.books || []));
+          localStorage.setItem(user.id + "_dashboard_books", JSON.stringify(updatedData.books || []));
         }
       } else {
         // ...existing error handling...
@@ -386,10 +433,35 @@ export default function Dashboard() {
     }
   }, [isDesktop]);
 
+  // Refresh completion handler for Dashboard
+  const handleDashboardRefreshComplete = async (results: any[]) => {
+    // Re-fetch books and stats to update UI
+    console.log("Results from refresh:", results);
+    const booksResult = results.find((r, i) => user.id + "_dashboard_books" === 'dashboard_books');
+    const statsResult = results.find((r, i) => user.id + "_stats" === 'dashboard_stats');
+
+    if (booksResult?.success && booksResult.data) {
+      setBooks(booksResult.data);
+    }
+
+
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
-      {/* Coins dashboard at the top */}
+      {/* Header with Refresh button and Coins dashboard */}
       <div className="w-full flex justify-end items-center px-8 pt-6">
+        <div className="flex items-center gap-4">
+          <RefreshButton
+            configs={dashboard_cache_configurations}
+            onRefreshComplete={handleDashboardRefreshComplete}
+            size="md"
+            position="left"
+            showLabel={true}
+            className="mr-4" // Add margin right to separate from coins dashboard
+          />
+        </div>
+        
         <CoinsDashboard coins={typeof coins === "number" && !isNaN(coins) ? coins : 0} />
       </div>
 
