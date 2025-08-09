@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import UploadClippingsSidebar from "@/components/UploadClippingsSidebar";
-import { Menu } from "lucide-react";
+import { Backpack, Menu } from "lucide-react";
 import BookPdf from "../components/BookPdf";
 import { pdf } from "@react-pdf/renderer";
 import { useNavigate } from "react-router-dom";
@@ -434,9 +434,9 @@ export default function Dashboard() {
         )}
 
         {/* Main content: add left margin on desktop to make space for fixed sidebar */}
-        <main
-          className={`flex-1 max-w-7xl mx-auto py-10 px-4 flex flex-col items-center justify-center transition-all duration-300
-            ${isDesktop ? "ml-64" : ""}
+        <main             
+          className={`flex-1 mx-auto py-10 px-4 flex flex-col items-center justify-center transition-all duration-300
+            ${isDesktop ? "ml-64 mr-16"  : ""}
           `}
         >
           <h1 className="text-3xl font-bold mb-8 text-center text-royal-700">Dashboard</h1>
@@ -457,7 +457,7 @@ export default function Dashboard() {
                 className={
                   !isDesktop && !sidebarOpen
                     ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                    : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                    : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
                 }
               >
                 {filteredBooks.map((book) => (
