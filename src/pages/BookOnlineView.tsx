@@ -3,6 +3,7 @@ import { ArrowLeft, Pencil, X, Package, CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import EditHighlightModal from "@/components/EditHighlightModal";
+import { toast } from "sonner"; // Make sure this import is at the top
 
 interface Highlight {
   _id: string;
@@ -324,14 +325,28 @@ export default function BookOnlineView() {
     // Update the book cache in localStorage if you're using it
     updateBookCache(book);
     
-    // Force re-render by updating a state that triggers filteredHighlights recalculation
-    // You might need to add a refresh trigger state
-    // setHasInitialScrolled(false); // This will trigger useEffect to re-calculate filtered highlights
   };
 
   // Function to handle failed operations
   const handleFailedOperations = (failedOperations: any[]) => {
+
+    if (failedOperations.length === 0) return;
+
     failedOperations.forEach((failedOp) => {
+
+      const stagedOp = stagingArea.find(op => op.id === failedOp.operationId);
+      const operationType = failedOp.type || stagedOp?.type || 'operate on highlight';
+      const highlightPreview = stagedOp?.originalHighlight?.highlight?.substring(0, 50) || 'Unknown highlight';
+
+      toast.error(
+      `Failed to ${operationType} highlight: "${highlightPreview}${highlightPreview.length >= 50 ? '...' : ''}"`,
+      {
+        description: failedOp.message || 'Committing Staging Data failed.',
+        duration: 5000,// longer pop up for errors
+      }
+    );
+
+
       console.error(`Operation ${failedOp.operationId} failed:`, failedOp.message);
     });
     
