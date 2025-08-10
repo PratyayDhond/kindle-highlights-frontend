@@ -12,6 +12,7 @@ interface CacheRefreshConfig {
 
 interface RefreshButtonProps {
   configs: CacheRefreshConfig[];
+  parentComponentName: string;
   onRefreshComplete?: (results: { success: boolean; data?: any; error?: string }[]) => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -21,6 +22,7 @@ interface RefreshButtonProps {
 
 const RefreshButton: React.FC<RefreshButtonProps> = ({
   configs,
+  parentComponentName,
   onRefreshComplete,
   className = '',
   size = 'md',
@@ -129,9 +131,9 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
       const failureCount = results.filter(r => !r.success).length;
 
       if (failureCount === 0) {
-        toast.success(`Successfully refreshed ${successCount} cache${successCount > 1 ? 's' : ''}!`);
+        toast.success(`Successfully refreshed ${parentComponentName} cache${successCount > 1 ? 's' : ''}!`);
       } else if (successCount > 0) {
-        toast.warning(`Refreshed ${successCount}/${configs.length} caches. ${failureCount} failed.`);
+        toast.warning(`Refreshed ${successCount}/${configs.length} of ${parentComponentName} caches. ${failureCount} failed.`);
       } else {
         toast.error('Failed to refresh data. Please try again.');
       }

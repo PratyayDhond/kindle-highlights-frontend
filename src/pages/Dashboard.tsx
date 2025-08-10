@@ -454,11 +454,12 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           <RefreshButton
             configs={dashboard_cache_configurations}
+            parentComponentName="Dashboard"
             onRefreshComplete={handleDashboardRefreshComplete}
             size="md"
             position="left"
             showLabel={true}
-            className="mr-4" // Add margin right to separate from coins dashboard
+            className="mr-4" 
           />
         </div>
         
