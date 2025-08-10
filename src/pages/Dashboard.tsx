@@ -570,5 +570,6 @@ export default function Dashboard() {
   );
 }
 
-
-// #todo write backend apis for handling upload of kindle clippings file to be uploaded to user profile.
+// #todo Use cache
+//  - only with bookId works fine as books are unique to user (for Dashboard)
+//  - userId_stats -> since stats might be different for users ( or we just let users do it manually.)

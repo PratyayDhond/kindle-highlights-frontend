@@ -157,23 +157,6 @@ export default function BookOnlineView() {
     });
   };
 
-  // Filter highlights by search keyword (case-insensitive) and checkbox state
-  var filteredHighlights =
-    book.highlights
-      ? book.highlights.filter((hl: any) => {
-          // This checks and filters through the current active highlight
-          const isActive = hl.knowledge_end_date === null
-          const matchesSearch = search
-            ? hl.highlight.toLowerCase().includes(search.toLowerCase())
-            : true;
-          const matchesType =
-            (showHighlights && hl.type === "highlight") ||
-            (showNotes && hl.type === "note") ||
-            (showUrlsOnly && hl.containsUrl);
-          return isActive && matchesSearch && matchesType;
-        })
-      : [];
-
   // Add operation to staging area
   const addToStagingArea = (operation: Omit<StagedOperation, 'id' | 'timestamp'>) => {
     const stagedOp: StagedOperation = {
@@ -392,7 +375,7 @@ export default function BookOnlineView() {
         .filter((hl: any) => {
           // Exclude highlights staged for deletion
           const stagedOp = isHighlightStaged(hl._id);
-          if (stagedOp?.type === 'delete') return false;
+          if (stagedOp?.type === 'delete' || stagedOp?.type === 'edit') return false;
           
           // Apply existing filters
           const isActive = hl.knowledge_end_date === null;
@@ -841,3 +824,8 @@ export default function BookOnlineView() {
     </div>
   );
 }
+
+// #todo
+//  Modularise this code -  Move staging area and EditModalViewForm to separate components
+//  Add RefreshManually button
+//  Add Cache usage for highlights and books. First we fetch from cache, then only from API if needed
