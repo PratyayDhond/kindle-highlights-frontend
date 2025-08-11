@@ -178,6 +178,7 @@ const Auth = () => {
         setUser({
           name: data.firstName,
           email: data.email,
+          id: data.id
         });
         toast.success(data.message || "Login successful!");
         navigate("/");

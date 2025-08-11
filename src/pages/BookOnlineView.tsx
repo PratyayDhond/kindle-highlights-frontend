@@ -1,13 +1,25 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil, X } from "lucide-react";
+import { ArrowLeft, Package } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import EditHighlightModal from "@/components/EditHighlightModal";
+import StagingArea from "@/components/StagingArea";
+import HighlightDisplay from "@/components/HighlightDisplay";
+import { useStagingArea } from "@/hooks/useStagingArea";
+import { toast } from "sonner";
+import { Book, Highlight } from "@/interfaces";
+import { useScrollPosition } from '@/hooks/useScrollPosition';
+import { getScrollPositionFromLocalCache, setScrollPositionToLocalCache } from "@/utils/scrollPositionHelpers";
 
 export default function BookOnlineView() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { book } = location.state || {};
+  const [book, setBook] = useState<Book | null>(location.state?.book || null);
+  
+  // Early return if no book
+  if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
+
+  // State
   const [search, setSearch] = useState("");
   const [showHighlights, setShowHighlights] = useState(true);
   const [showNotes, setShowNotes] = useState(true);
@@ -16,15 +28,62 @@ export default function BookOnlineView() {
   const [isViewFilterOpen, setIsViewFilterOpen] = useState(false);
   const [strictPunctuation, setStrictPunctuation] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingHighlight, setEditingHighlight] = useState<any>(null);
+  const [editingHighlight, setEditingHighlight] = useState<Highlight | null>(null);
+  const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
+  const [showStagingArea, setShowStagingArea] = useState(false);
+  const [hasInitialScrolled, setHasInitialScrolled] = useState(false);
 
-  // Refs for scroll management
+  // Refs
   const highlightRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Use staging area hook
+  const {
+    stagingArea,
+    isCommitting,
+    addToStagingArea,
+    removeFromStagingArea,
+    clearStagingArea,
+    isHighlightStaged,
+    getEffectiveHighlight,
+    commitStagedOperations,
+  } = useStagingArea({
+    bookId: book._id,
+    onUpdateLocalBookData: updateLocalBookData,
+    onHandleFailedOperations: handleFailedOperations,
+  });
+
+
+  // Filter highlights
+  const filteredHighlights = book.highlights
+    ? book.highlights
+        .filter((hl: any) => {
+          const stagedOp = isHighlightStaged(hl._id);
+          if (stagedOp?.type === 'delete' || stagedOp?.type === 'edit') return false;
+          
+          const isActive = hl.knowledge_end_date === null;
+          const matchesSearch = search
+            ? hl.highlight.toLowerCase().includes(search.toLowerCase())
+            : true;
+          const matchesType =
+            (showHighlights && hl.type === "highlight") ||
+            (showNotes && hl.type === "note") ||
+            (showUrlsOnly && hl.containsUrl);
+          return isActive && matchesSearch && matchesType;
+        })
+        .map((hl: any) => getEffectiveHighlight(hl))
+    : [];
+
+  // Effects
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Ctrl+Shift+Backspace or Cmd+Shift+Backspace
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "Backspace") {
         e.preventDefault();
         navigate("/dashboard");
@@ -34,7 +93,7 @@ export default function BookOnlineView() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [navigate]);
 
-  // Add URL detection useEffect
+  // URL detection
   useEffect(() => {
     if (book && book.highlights) {
       book.highlights.forEach((hl: any) => {
@@ -52,24 +111,53 @@ export default function BookOnlineView() {
     }
   }, [book]);
 
-  if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
+  useEffect(() => {
+    if(filteredHighlights && filteredHighlights.length > 0 && !hasInitialScrolled) {
+      const savedPosition = getScrollPositionFromLocalCache(book._id);
+      if (savedPosition !== null && savedPosition < filteredHighlights.length) {
+        // Scroll to saved position
+        setTimeout(() => {
+          const element = highlightRefs.current[savedPosition];
+          if (element) {
+            element.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }
+          setHasInitialScrolled(true); // Mark as scrolled
+        }, 100);
+      } else {
+        // Scroll to top if no saved position
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+          setHasInitialScrolled(true); // Mark as scrolled
+        }, 100);
+      }
+    }
 
-  // Function to make URLs clickable
+  }, [hasInitialScrolled]);
+
+  // Use the scroll position hook
+  useScrollPosition({
+    enabled: hasInitialScrolled && filteredHighlights?.length > 0,
+    items: filteredHighlights,
+    itemRefs: highlightRefs,
+    onPositionChange: setScrollPositionToLocalCache,
+    throttleMs: 100,    // Process scroll events every 100ms
+    debounceMs: 1000,    // Save position 1000ms after scrolling stops
+    bookId: book._id
+  });
+
+  // Helper functions
   const makeUrlsClickable = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
     const parts = text.split(urlRegex);
-    console.log(parts)
+    
     return parts.map((part, index) => {
       const testRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
       if (testRegex.test(part)) {
-        // Add https:// prefix if the URL starts with www.
-
         if(showQuotes && part.endsWith('"'))
-          part = part.slice(0, -1); // Remove trailing quote for URL processing
+          part = part.slice(0, -1);
         if(strictPunctuation && part.endsWith('.'))
-          part = part.slice(0, -1); // Remove trailing period for URL processing
+          part = part.slice(0, -1);
 
-        console.log(part)
         const href = part.startsWith('www.') ? `https://${part}` : part;
         return (
           <a
@@ -83,192 +171,160 @@ export default function BookOnlineView() {
           </a>
         );
       }
+      
       if(index === 0 && showQuotes && !part.startsWith('"')) {
-        part = `"${part}`; // Add opening quote if not present
+        part = `"${part}`;
       }
       if(index === parts.length - 1 ){
         if(strictPunctuation && !part.endsWith('.')) {
-          part += '.'; // Add period if strict punctuation is enabled and not present
+          part += '.';
         }
         if(showQuotes && !part.endsWith('"'))
-          part += '"'; // Add closing quote if not present
+          part += '"';
       }
       return part;
     });
   };
 
-  // Filter highlights by search keyword (case-insensitive) and checkbox state
-  const filteredHighlights =
-    book.highlights
-      ? book.highlights.filter((hl: any) => {
-          // This checks and filters through the current active highlight
-          const isActive = hl.knowledge_end_date === null
-          const matchesSearch = search
-            ? hl.highlight.toLowerCase().includes(search.toLowerCase())
-            : true;
-          const matchesType =
-            (showHighlights && hl.type === "highlight") ||
-            (showNotes && hl.type === "note") ||
-            (showUrlsOnly && hl.containsUrl);
-          return isActive && matchesSearch && matchesType;
-        })
-      : [];
-
-  // Handle delete highlight
-  const handleDelete = (index: number) => {
-    if (window.confirm("Are you sure you want to delete this highlight?")) {
-      // TODO: Implement delete API call
-      console.log("Deleting highlight at index:", index);
-    }
+  // Handlers
+  const handleDeleteIconClick = (index: number, highlight: Highlight) => {
+    addToStagingArea({
+      type: 'delete',
+      highlightId: highlight._id,
+      originalHighlight: highlight,
+    });
   };
 
-  // Handle edit highlight
-  const handleEdit = (index: number, highlight: any) => {
-    setEditingHighlight({ ...highlight, index });
+  const handleEditIconClick = (index: number, highlight: Highlight) => {
+    setEditingHighlight({ ...highlight });
     setIsEditModalOpen(true);
   };
 
-  // Handle save edit
-  const handleSaveEdit = (updatedHighlight: any) => {
-    if (editingHighlight && book.highlights) {
-      // TODO: Implement API call to update highlight
-      console.log("Saving edit:", updatedHighlight);
-      
-      // For now, update locally (replace with API call)
-      book.highlights[editingHighlight.index] = {
-        ...book.highlights[editingHighlight.index],
-        ...updatedHighlight,
-      };
+  const handleSaveOnEditComplete = (updatedHighlight: any) => {
+    if (editingHighlight) {
+      addToStagingArea({
+        type: 'edit',
+        highlightId: editingHighlight._id,
+        originalHighlight: editingHighlight,
+        updatedHighlight: updatedHighlight,
+      });
       
       setIsEditModalOpen(false);
       setEditingHighlight(null);
     }
   };
 
-  // Handle cancel edit
-  const handleCancelEdit = () => {
-    setIsEditModalOpen(false);
-    setEditingHighlight(null);
-  };
-
-  // Cache management functions
-  const getScrollCacheKey = (bookTitle: string) => {
-    return `book_scroll_position_${bookTitle.replace(/[^a-zA-Z0-9]/g, '_')}`;
-  };
-
-  const saveScrollPosition = (highlightIndex: number) => {
-    if (book?.title) {
-      const cacheKey = getScrollCacheKey(book.title); 
-      localStorage.setItem(cacheKey, highlightIndex.toString());
-    }
-  };
-
-  const getScrollPosition = (): number | null => {
-    if (book?.title) {
-      const cacheKey = getScrollCacheKey(book.title);
-      const saved = localStorage.getItem(cacheKey);
-      return saved ? parseInt(saved) : null;
-    }
-    return null;
-  };
-
-  // Scroll to saved position when component mounts and data is ready
-  useEffect(() => {
-    if (book && filteredHighlights && filteredHighlights.length > 0) {
-      const savedPosition = getScrollPosition();
+  // Business logic functions
+  function updateLocalBookData(successfulOperations: any[]) {
+    if (!book || !book.highlights) return;
+    
+    successfulOperations.forEach((successOp) => {
+      const { operationId, highlightId, type } = successOp;
+      const stagedOp = stagingArea.find(op => op.id === operationId);
+      if (!stagedOp) return;
       
-      if (savedPosition !== null && savedPosition < filteredHighlights.length) {
-        // Scroll to saved position
-        setTimeout(() => {
-          const element = highlightRefs.current[savedPosition];
-          if (element) {
-            element.scrollIntoView({ behavior: 'auto', block: 'start' });
-          }
-        }, 100); // Small delay to ensure DOM is ready
-      } else {
-        // Scroll to top if no saved position
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'auto' });
-        }, 100);
+      const highlightIndex = book.highlights.findIndex(hl => hl._id === highlightId);
+      if (highlightIndex === -1) return;
+      
+      if (type === 'edit' && stagedOp.updatedHighlight) {
+        book.highlights[highlightIndex] = {
+          ...book.highlights[highlightIndex],
+          ...stagedOp.updatedHighlight,
+        };
+        // console.log(`Updated highlight ${highlightId} locally`);
+      } else if (type === 'delete') {
+        book.highlights[highlightIndex] = {
+          ...book.highlights[highlightIndex],
+          knowledge_end_date: new Date().toISOString(),
+        };
+        // console.log(`Soft deleted highlight ${highlightId} locally`);
       }
-    }
-  }, [book, filteredHighlights]);
+    });
+    
+    updateBookCache(book);
+  }
 
-  // Track scroll position and save to cache
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!filteredHighlights || filteredHighlights.length === 0) return;
+  function handleFailedOperations(failedOperations: any[]) {
+    if (failedOperations.length === 0) return;
 
-      // Find the highlight that's currently most visible
-      let visibleHighlight = 0;
-      const windowHeight = window.innerHeight;
-      const scrollTop = window.pageYOffset;
+    failedOperations.forEach((failedOp) => {
+      const stagedOp = stagingArea.find(op => op.id === failedOp.operationId);
+      const operationType = failedOp.type || stagedOp?.type || 'operate on highlight';
+      const highlightPreview = stagedOp?.originalHighlight?.highlight?.substring(0, 50) || 'Unknown highlight';
 
-      for (let i = 0; i < filteredHighlights.length; i++) {
-        const element = highlightRefs.current[i];
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          const elementTop = rect.top + scrollTop;
-          
-          // If element is in viewport or passed it
-          if (elementTop <= scrollTop + windowHeight / 2) {
-            visibleHighlight = i;
-          } else {
-            break;
-          }
+      toast.error(
+        `Failed to ${operationType} highlight: "${highlightPreview}${highlightPreview.length >= 50 ? '...' : ''}"`,
+        {
+          description: failedOp.message || 'Committing Staging Data failed.',
+          duration: 5000,
         }
-      }
+      );
+      console.error(`Operation ${failedOp.operationId} failed:`, failedOp.message);
+    });
+  }
 
-      // Debounce saving to avoid excessive localStorage writes
-      const timeoutId = setTimeout(() => {
-        saveScrollPosition(visibleHighlight);
-      }, 1000); // Save after 1 second of no scrolling
+  function updateBookCache(updatedBook: any) {
+    try {
+      const bookCacheKey = `book_${updatedBook._id}`;
+      localStorage.setItem(bookCacheKey, JSON.stringify(updatedBook));
+    } catch (error) {
+      console.error('Failed to update book cache:', error);
+    }
+  }
 
-      return () => clearTimeout(timeoutId);
-    };
-
-    // Throttle scroll events
-    let ticking = false;
-    const throttledScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', throttledScroll);
-    return () => {
-      window.removeEventListener('scroll', throttledScroll);
-    };
-  }, [filteredHighlights]);
-
-  // Set ref for each highlight
   const setHighlightRef = (index: number) => (el: HTMLDivElement | null) => {
     highlightRefs.current[index] = el;
   };
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4" ref={containerRef}>
-      {/* Go Back Icon */}
-      <button
-        className="mb-6 flex items-center text-royal-600 hover:text-royal-800 transition-colors"
-        onClick={() => navigate("/dashboard")}
-        aria-label="Go back to dashboard"
-      >
-        <ArrowLeft className="w-5 h-5 mr-2" />
-        <span className="font-medium">Back to Dashboard</span>
-      </button>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <button
+          className="flex items-center text-royal-600 hover:text-royal-800 transition-colors"
+          onClick={() => navigate("/dashboard")}
+          aria-label="Go back to dashboard"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span className="font-medium">Back to Dashboard</span>
+        </button>
+        
+        <button
+          onClick={() => setShowStagingArea(!showStagingArea)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+            stagingArea.length > 0 
+              ? 'border-orange-300 bg-orange-50 text-orange-700' 
+              : 'border-gray-300 text-gray-600'
+          }`}
+        >
+          <Package className="w-4 h-4" />
+          <span>Staging ({stagingArea.length})</span>
+        </button>
+      </div>
+
+      {/* Staging Section */}
+      {showStagingArea && (
+        <StagingArea
+          stagingArea={stagingArea}
+          isCommitting={isCommitting}
+          isDesktop={isDesktop}
+          onRemoveOperation={removeFromStagingArea}
+          onClearAll={clearStagingArea}
+          onCommitAll={commitStagedOperations}
+        />
+      )}
+
+      {/* Book Title and Search */}
       <h1 className="text-3xl font-bold text-royal-700 mb-2 text-center">{book.title}</h1>
       <h2 className="text-lg text-gray-600 mb-8 text-center">by {book.author}</h2>
+      
       <GlobalSearchBar
         value={search}
         onChange={setSearch}
         placeholder="Search highlights..."
       />
-      {/* Checkboxes for filtering */}
+
+      {/* Filters */}
       <div className="flex gap-6 items-center mb-6 mt-2 justify-center">
         <label className="flex items-center gap-2">
           Show results for: 
@@ -289,7 +345,7 @@ export default function BookOnlineView() {
           />
           <span>Notes</span>
         </label>
-                <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={showUrlsOnly}
@@ -299,7 +355,8 @@ export default function BookOnlineView() {
           <span>Urls</span>
         </label>
       </div>
-      {/* View filter checkboxes */}
+
+      {/* View Filter */}
       <div className="mb-6 justify-center">
         <button
           onClick={() => setIsViewFilterOpen(!isViewFilterOpen)}
@@ -334,18 +391,22 @@ export default function BookOnlineView() {
                 onChange={() => setStrictPunctuation((v) => !v)}
                 className="accent-royal-600"
               />
-              <span>Add punctuation (.) to all quotes without one. </span>
+              <span>Add punctuation (.) to all quotes without one.</span>
             </label>
           </div>
         )}
       </div>
+
+      {/* Highlights List */}
       <div className="space-y-6 min-h-[60vh]">
         {filteredHighlights && filteredHighlights.length > 0 ? (
           (() => {
             let highlightCount = 0;
             let noteCount = 0;
+            
             return filteredHighlights.map((hl: any, idx: number) => {
-              // Assume hl.type is either "highlight" or "note"
+              const stagedOp = isHighlightStaged(hl._id);
+              
               let label = "Highlight";
               if (hl.type === "note") {
                 noteCount += 1;
@@ -354,85 +415,22 @@ export default function BookOnlineView() {
                 highlightCount += 1;
                 label = `Highlight ${highlightCount}`;
               }
+              
               return (
-                <div
-                  key={idx}
-                  ref={setHighlightRef(idx)}
-                  className="bg-white rounded-lg shadow p-4 border-l-4 border-royal-400"
-                >
-                  {/* Header with counter and action buttons */}
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="text-xs text-royal-600 font-semibold">
-                      {label}
-                    </div>
-                    {/* TODO: Uncomment when backend functionality is implemented
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(idx, hl)}
-                        className="text-gray-500 hover:text-blue-600 transition-colors p-1"
-                        title="Edit highlight"
-                        aria-label="Edit highlight"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(idx)}
-                        className="text-gray-500 hover:text-red-600 transition-colors p-1"
-                        title="Delete highlight"
-                        aria-label="Delete highlight"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    */}
-                  </div>
-                  <div className="text-gray-800 text-base mb-2">
-                    { 
-                      (() => {
-                        const punctuationMarks = ['.', '!', '?', ';', ':', '…'];
-                        const endsWithPunctuation = punctuationMarks.some(mark => hl.highlight.endsWith(mark));
-                        
-                        let text = hl.highlight;
-                        if (strictPunctuation && !endsWithPunctuation) {
-                          text = `${hl.highlight}.`;
-                        }
-                        
-                        const finalText = text;
-                        
-                        // If contains URL, make links clickable
-                        if (hl.containsUrl) {
-                          return <span>{makeUrlsClickable(finalText)}</span>;
-                        }
-                        
-                        return finalText;
-                      })()
-                    }
-                  </div>
-                  <div className="text-xs text-gray-500 flex gap-4">
-                    {hl.page && (
-                      <span>Page: {hl.page} </span>
-                    )}
-                    <span>
-                      Location: {hl.location.start} {hl.location.end !== -1 ? `-${hl.location.end}` : ''}
-                    </span>
-                    <span>
-                      Highlighted On: {hl.timestamp
-                        ? (() => {
-                            const date = new Date(hl.timestamp);
-                            if (isNaN(date.getTime())) return "N/A";
-                            const pad = (n: number) => n.toString().padStart(2, "0");
-                            const hours = pad(date.getHours());
-                            const minutes = pad(date.getMinutes());
-                            const seconds = pad(date.getSeconds());
-                            const day = pad(date.getDate());
-                            const month = pad(date.getMonth() + 1);
-                            const year = date.getFullYear();
-                            return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-                          })()
-                        : "N/A"}
-                    </span>
-                  </div>
-                </div>
+                <HighlightDisplay
+                  key={hl._id || idx}
+                  highlight={hl}
+                  index={idx}
+                  label={label}
+                  stagedOp={stagedOp}
+                  isDesktop={isDesktop}
+                  showQuotes={showQuotes}
+                  strictPunctuation={strictPunctuation}
+                  makeUrlsClickable={makeUrlsClickable}
+                  onEdit={handleEditIconClick}
+                  onDelete={handleDeleteIconClick}
+                  setHighlightRef={setHighlightRef}
+                />
               );
             });
           })()
@@ -450,9 +448,17 @@ export default function BookOnlineView() {
       <EditHighlightModal
         isOpen={isEditModalOpen}
         highlight={editingHighlight}
-        onSave={handleSaveEdit}
-        onCancel={handleCancelEdit}
+        onSave={handleSaveOnEditComplete}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          setEditingHighlight(null);
+        }}
       />
     </div>
   );
 }
+
+// #todo
+//  Modularise this code -  Move staging area and EditModalViewForm to separate components
+//  Add RefreshManually button
+//  Add Cache usage for highlights and books. First we fetch from cache, then only from API if needed

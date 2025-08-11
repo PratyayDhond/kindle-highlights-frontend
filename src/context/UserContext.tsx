@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 interface User {
     name: string | null;
     email: string | null;
+    id: string | null;
 }
 
 interface UserContextType {
@@ -35,7 +36,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
           return;
         }
-        console.log(userId)
+
 
         res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/user`, {
           method: "POST",
@@ -47,8 +48,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         if (res.ok) {
           const userData = await res.json();
-          console.log(userData)
-          setUser({ email: userData.email, name: userData.firstName || null });
+          setUser({ email: userData.email, name: userData.firstName || null, id: userId });
         } else {
           setUser(null);
         }
