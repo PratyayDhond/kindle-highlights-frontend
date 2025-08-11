@@ -424,7 +424,7 @@ export default function Dashboard() {
   // Refresh completion handler for Dashboard
   const handleDashboardRefreshComplete = async (results: any[]) => {
     // Re-fetch books and stats to update UI
-    console.log("Results from refresh:", results);
+    // console.log("Results from refresh:", results);
     const booksResult = results.find((r, i) => user.id + "_dashboard_books" === 'dashboard_books');
     const statsResult = results.find((r, i) => user.id + "_stats" === 'dashboard_stats');
 

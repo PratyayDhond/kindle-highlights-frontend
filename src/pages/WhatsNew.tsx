@@ -2,15 +2,16 @@ import Footer from "@/components/Footer";
 import { version } from "os";
 
 const whatsNewData = [
-	// {
-	// 	version: "v3.2.3",
-	// 	date: "2025-07-23",
-	// 	changes: [
-	// 		"Added Option to Delete Highlights/Notes from Book Online View.",
-	// 		"Added Option to Update Notes/Highlights from Book Online View.",
-	// 		"Added version history for highlights in Book Online View."
-	// 	]
-	// },
+	{
+		version: "v3.3.0",
+		date: "2025-08-11",
+		changes: [
+			"Added Option to Delete Highlights/Notes from Book Online View.",
+			"Added Option to Update Notes/Highlights from Book Online View.",
+			"Added Staging Area for pending highlight updates in Book Online View.",
+			"Added Refresh button for manual refresh on User Books Dashboard."
+		]
+	},
 	{
 		version: "v3.2.2",
 		date: "2025-08-05",
