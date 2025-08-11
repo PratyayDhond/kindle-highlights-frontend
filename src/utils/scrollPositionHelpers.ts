@@ -1,4 +1,4 @@
-  function getScrollPositionFromCache(bookId: string): number | null {
+  function getScrollPositionFromLocalCache(bookId: string): number | null {
     const cachedPosition = localStorage.getItem(`scroll_position_${bookId}`);
     if (cachedPosition) {
       const position = parseInt(cachedPosition, 10);
@@ -11,4 +11,4 @@
     localStorage.setItem(`scroll_position_${bookId}`, position.toString());
   }
 
-  export {getScrollPositionFromCache, setScrollPositionToLocalCache};
+  export {getScrollPositionFromLocalCache, setScrollPositionToLocalCache};

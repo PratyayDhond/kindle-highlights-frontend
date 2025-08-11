@@ -142,18 +142,18 @@ export const useStagingArea = ({
       
       // Clear staging area on success (or partial success)
       clearStagingArea();
-      
+      console.log("Response data after commit:", responseData);
       // Show success/partial success message
-      if (responseData.results.successCount === responseData.totalOperations) {
-        console.log(`Successfully committed all ${responseData.results.successCount} operations`);
+      if (responseData.results.successCount === responseData.results.totalOperations) {
+        // console.log(`Successfully committed all ${responseData.results.successCount} operations`);
         toast.success(`Successfully updated ${responseData.results.successCount} highlights`);
       } else {
-        console.log(`Committed ${responseData.results.successCount}/${responseData.results.totalOperations} operations`);
+        // console.log(`Committed ${responseData.results.successCount}/${responseData.results.totalOperations} operations`);
         toast.warning(`Updated ${responseData.results.successCount} of ${responseData.results.totalOperations} highlights`);
       }
       
     } catch (error) {
-      console.error('Failed to commit staged operations:', error);
+    //   console.error('Failed to commit staged operations:', error);
       toast.error('Failed to commit changes. Please try again.');
     } finally {
       setIsCommitting(false);

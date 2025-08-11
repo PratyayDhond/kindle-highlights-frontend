@@ -12,19 +12,7 @@ import { useStats } from "@/context/StatsContext";
 import { useToast } from '@/hooks/use-toast';
 import RefreshButton from "@/components/RefreshButton";
 import {useUser} from "@/context/UserContext";
-
-interface Book {
-  _id: string;
-  title: string;
-  author: string;
-  coverUrl?: string;
-  highlights?: {
-    highlight: string;
-    page: number;
-    location: string;
-    timeStamp: string;
-  }[];
-}
+import {Book} from "@/interfaces";
 
 const dashboard_cache_configurations = [ 
   {
@@ -391,7 +379,7 @@ export default function Dashboard() {
 
 
       // Navigate to /book/:bookId and pass book data as state
-      navigate(`/book/${bookId}`, { state: { book: data.book } });
+      navigate(`/book/${bookId}`, { state: { book: data.book as Book} });
     } catch (err) {
       toast.error("Failed to open book.");
     }

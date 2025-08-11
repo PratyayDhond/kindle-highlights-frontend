@@ -1,4 +1,4 @@
-import { BooksCached } from "@/interfaces";
+import { Book, BooksCached } from "@/interfaces";
 
 const FUNCTION_FAILURE = false;
 const FUNCTION_SUCCESS = true;
