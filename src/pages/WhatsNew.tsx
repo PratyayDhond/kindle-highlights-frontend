@@ -3,6 +3,15 @@ import { version } from "os";
 
 const whatsNewData = [
 	{
+		version: "v4.0.0",
+		date: "2025-09-24",
+		changes: [
+			"Added Kindle Integration feature.",
+			"Users can now generate a unique Kindle secret key from the dashboard.",
+			"Users can send their Kindle highlights directly to their account using their kindle devices."
+		]
+	},
+	{
 		version: "v3.3.0",
 		date: "2025-08-11",
 		changes: [

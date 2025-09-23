@@ -18,6 +18,7 @@ import BookOnlineView from "./pages/BookOnlineView";
 import Newsletter from "@/pages/Newsletter";
 import Unsubscribe from "@/pages/Unsubscribe";
 import { UserProvider } from "@/context/UserContext";
+import KindleSecret from "./pages/KindleSecret";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Unsubscribe />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/kindle-secret"
+                  element={
+                    <ProtectedRoute>
+                      <KindleSecret />
                     </ProtectedRoute>
                   }
                 />

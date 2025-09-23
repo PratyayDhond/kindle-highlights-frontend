@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Key } from "lucide-react";
 
 const navLinks = [
   { label: "Tool", path: "/" },
@@ -67,6 +68,13 @@ const Header: React.FC = () => {
             {link.label}
           </button>
         ))}
+        <Link
+          to="/kindle-secret"
+          className="flex items-center gap-2 text-royal-600 hover:text-royal-800"
+        >
+          <Key className="w-4 h-4" />
+          Kindle Integration
+        </Link>
       </nav>
     </header>
   );
