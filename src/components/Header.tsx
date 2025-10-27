@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Key } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navLinks = [
   { label: "Tool", path: "/" },
@@ -76,6 +77,9 @@ const Header: React.FC = () => {
           Kindle Integration
         </Link>
       </nav>
+      <div className="ml-4">
+        <ThemeToggle />
+      </div>
     </header>
   );
 };
