@@ -45,7 +45,7 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 px-2 py-3 flex items-center justify-center shadow-sm">
+    <header className="w-full bg-white border-b border-gray-200 px-2 py-3 flex items-center justify-center shadow-sm transition-colors duration-300">
       <nav
         ref={navRef}
         className="
