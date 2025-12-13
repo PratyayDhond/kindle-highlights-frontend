@@ -12,7 +12,7 @@ interface DashboardDrawerProps {
     totalHighlights: number;
     avgHighlights: number;
     maxHighlights: number;
-    updatedAt: Date; 
+    updatedAt: Date;
   };
 }
 
@@ -25,18 +25,18 @@ const DashboardDrawer: React.FC<DashboardDrawerProps> = ({ open, onClose, onLogo
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex">
-      <div className="bg-white w-64 h-full shadow-xl p-6 flex flex-col">
+      <div className="bg-white dark:bg-card w-64 h-full shadow-xl p-6 flex flex-col border-r border-border">
         <button
           onClick={onClose}
-          className="self-end mb-4 text-gray-400 hover:text-gray-600"
+          className="self-end mb-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
           ✕
         </button>
         {/* User Info */}
         {user && (
           <div className="mb-6">
-            <div className="text-lg font-semibold text-royal-700">Hello {user.name ? user.name : "Book Lover"}</div>
-            <div className="text-xs text-gray-500 break-all">{user.email}</div>
+            <div className="text-lg font-semibold text-royal-700 dark:text-base">Hello {user.name ? user.name : "Book Lover"}</div>
+            <div className="text-xs text-gray-500 dark:text-muted-foreground break-all">{user.email}</div>
           </div>
         )}
         {stats && (

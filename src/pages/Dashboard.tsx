@@ -11,10 +11,10 @@ import { useCoins } from "@/context/CoinsContext"; // <-- Import your CoinsConte
 import { useStats } from "@/context/StatsContext";
 import { useToast } from '@/hooks/use-toast';
 import RefreshButton from "@/components/RefreshButton";
-import {useUser} from "@/context/UserContext";
-import {Book} from "@/interfaces";
+import { useUser } from "@/context/UserContext";
+import { Book } from "@/interfaces";
 
-const dashboard_cache_configurations = [ 
+const dashboard_cache_configurations = [
   {
     cacheKey: 'dashboard_books',
     apiUrl: `${import.meta.env.VITE_BACKEND_URL}/user/books`,
@@ -65,8 +65,8 @@ export default function Dashboard() {
   // Fetch stats from backend when books change or on mount
   useEffect(() => {
     const fetchStats = async () => {
-      
-      if(!user || !user.id) {
+
+      if (!user || !user.id) {
         return;
       }
 
@@ -113,7 +113,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchBooks = async () => {
 
-      if(!user || !user.id) {
+      if (!user || !user.id) {
         return;
       }
       // Try to get books from localStorage cache first
@@ -143,7 +143,7 @@ export default function Dashboard() {
         if (!response.ok) throw new Error("Failed to fetch books");
         const data = await response.json();
         setBooks(data.books || []);
-        if(data.books && Array.isArray(data.books)) {
+        if (data.books && Array.isArray(data.books)) {
           localStorage.setItem(dashboardBooksCacheKey, JSON.stringify(data.books));
         }
       } catch (err) {
@@ -152,7 +152,7 @@ export default function Dashboard() {
       }
     };
 
-      fetchBooks();
+    fetchBooks();
   }, [user]);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function Dashboard() {
         .then(data => {
           if (typeof data.coins === "number") setCoins(data.coins);
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [coins, setCoins]);
 
@@ -207,7 +207,7 @@ export default function Dashboard() {
         return;
       }
 
-      if(!lastFile.name.endsWith(".txt")) {
+      if (!lastFile.name.endsWith(".txt")) {
         toastSonner({
           title: "Invalid File",
           description: "Please upload a .txt file.",
@@ -216,7 +216,7 @@ export default function Dashboard() {
         setLastFile(null);
         return;
       }
-      if( lastFile.size > import.meta.env.VITE_MAX_FILE_SIZE_MB * 1024 * 1024) {
+      if (lastFile.size > import.meta.env.VITE_MAX_FILE_SIZE_MB * 1024 * 1024) {
         toastSonner({
           title: "File Too Large",
           description: `Please upload a file smaller than ${import.meta.env.VITE_MAX_FILE_SIZE_MB} MB.`,
@@ -225,7 +225,7 @@ export default function Dashboard() {
         setLastFile(null);
         return;
       }
-      
+
       const formData = new FormData();
       formData.append('file', lastFile);
 
@@ -249,7 +249,7 @@ export default function Dashboard() {
         return;
       }
 
-      if(response.status === 418){
+      if (response.status === 418) {
         const data = await response.json();
         toastSonner({
           title: "Processing Error",
@@ -287,7 +287,7 @@ export default function Dashboard() {
           });
           return;
         }
-        if(response.status === 418){
+        if (response.status === 418) {
           const data = await response.json();
           toastSonner({
             title: "Processing Error",
@@ -324,7 +324,7 @@ export default function Dashboard() {
       const data = await response.json();
       // console.log(data)
       // console.log("Book PDF data:", data.book);
-      if(data.coins)
+      if (data.coins)
         setCoins(data.coins);
       const blob = await pdf(
         <BookPdf
@@ -365,21 +365,21 @@ export default function Dashboard() {
       const data = await response.json();
 
       data.book.highlights.sort((a, b) => {
-      
-      if (a.location.start !== b.location.start) {
-        return a.location.start - b.location.start;
-      }
-      // Keep notes before highlights if at the same location
-      if (a.type !== b.type) {
-        return a.type.localeCompare(b.type);
-      }
-      // If still equal, sort by timestamp
-      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-    });
+
+        if (a.location.start !== b.location.start) {
+          return a.location.start - b.location.start;
+        }
+        // Keep notes before highlights if at the same location
+        if (a.type !== b.type) {
+          return a.type.localeCompare(b.type);
+        }
+        // If still equal, sort by timestamp
+        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+      });
 
 
       // Navigate to /book/:bookId and pass book data as state
-      navigate(`/book/${bookId}`, { state: { book: data.book as Book} });
+      navigate(`/book/${bookId}`, { state: { book: data.book as Book } });
     } catch (err) {
       toast.error("Failed to open book.");
     }
@@ -436,7 +436,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 relative flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10 relative flex flex-col">
       {/* Header with Refresh button and Coins dashboard */}
       <div className="w-full flex justify-end items-center px-8 pt-6">
         <div className="flex items-center gap-4">
@@ -447,10 +447,10 @@ export default function Dashboard() {
             size="md"
             position="left"
             showLabel={true}
-            className="mr-4" 
+            className="mr-4"
           />
         </div>
-        
+
         <CoinsDashboard coins={typeof coins === "number" && !isNaN(coins) ? coins : 0} />
       </div>
 
@@ -471,8 +471,8 @@ export default function Dashboard() {
           <aside
             className={`
               ${isDesktop
-                ? "fixed left-0 top-0 h-full w-64 min-w-[16rem] border-r border-royal-100 z-30 bg-white/80 flex flex-col p-6 gap-8"
-                : "w-full z-30 bg-white/80 flex flex-col p-6 gap-8 top-0 left-0"}
+                ? "fixed left-0 top-0 h-full w-64 min-w-[16rem] border-r border-royal-100 dark:border-royal-800 z-30 bg-background/80 dark:bg-card/80 flex flex-col p-6 gap-8"
+                : "w-full z-30 bg-background/80 dark:bg-card/80 flex flex-col p-6 gap-8 top-0 left-0"}
               transition-transform duration-300
             `}
             style={
@@ -495,12 +495,12 @@ export default function Dashboard() {
         )}
 
         {/* Main content: add left margin on desktop to make space for fixed sidebar */}
-        <main             
+        <main
           className={`flex-1 mx-auto py-10 px-4 flex flex-col items-center justify-center transition-all duration-300
-            ${isDesktop ? "ml-64 mr-16"  : ""}
+            ${isDesktop ? "ml-64 mr-16" : ""}
           `}
         >
-          <h1 className="text-3xl font-bold mb-8 text-center text-royal-700">Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-8 text-center text-royal-700 dark:text-royal-400">Dashboard</h1>
           <GlobalSearchBar
             value={search}
             onChange={setSearch}
@@ -524,7 +524,7 @@ export default function Dashboard() {
                 {filteredBooks.map((book) => (
                   <div
                     key={book._id}
-                    className="bg-white rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[320px] max-h-[380px] max-w-xs w-full"
+                    className="bg-card rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow min-h-[320px] max-h-[380px] max-w-xs w-full"
                   >
                     <img
                       src={book.coverUrl || getRandomPlaceholder(book._id)}
@@ -532,10 +532,10 @@ export default function Dashboard() {
                       className="w-24 h-32 object-cover rounded mb-3"
                     />
                     <h2 className="text-lg font-semibold text-center line-clamp-2">{book.title}</h2>
-                    <p className="text-xs text-gray-500 mb-2">{book.author}</p>
+                    <p className="text-xs text-muted-foreground mb-2">{book.author}</p>
                     <div className="flex gap-2 mt-auto">
                       <button
-                        className="px-3 py-1 rounded bg-royal-100 text-royal-700 hover:bg-royal-200 transition"
+                        className="px-3 py-1 rounded bg-royal-100 text-royal-700 hover:bg-royal-200 dark:bg-royal-900/50 dark:text-royal-300 dark:hover:bg-royal-900 transition"
                         onClick={() => handleOpenBook(book._id)}
                       >
                         Open

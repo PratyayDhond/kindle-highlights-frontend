@@ -23,8 +23,8 @@ export default function KindleSecret() {
 
   // Fetch existing secret on component mount
   useEffect(() => {
-    if(user)
-        fetchSecret();
+    if (user)
+      fetchSecret();
   }, [user]);
 
   const fetchSecret = async () => {
@@ -113,7 +113,7 @@ export default function KindleSecret() {
     const content = `${secretData.userId},${secretData.secret},${backendUrl}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = 'kindle_secret.kindle_clippings';
@@ -121,7 +121,7 @@ export default function KindleSecret() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
+
     toast.success('Secret file downloaded!');
   };
 
@@ -150,7 +150,7 @@ export default function KindleSecret() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30">
+    <div className="min-h-screen bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10">
       <div className="max-w-4xl mx-auto py-10 px-4">
         {/* Header */}
         <div className="flex items-center mb-8">
@@ -162,20 +162,20 @@ export default function KindleSecret() {
             <span className="font-medium">Back to Dashboard</span>
           </button>
           <div className="flex items-center gap-3">
-            <Key className="w-8 h-8 text-royal-600" />
-            <h1 className="text-3xl font-bold text-royal-700">Kindle Secret Management</h1>
+            <Key className="w-8 h-8 text-royal-600 dark:text-royal-400" />
+            <h1 className="text-3xl font-bold text-royal-700 dark:text-royal-300">Kindle Secret Management</h1>
           </div>
         </div>
 
         {/* Disclaimer Alert */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-8">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 mb-8">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-lg font-semibold text-amber-800 mb-2">Important Security Notice</h3>
-              <ul className="text-amber-700 space-y-1 text-sm">
+              <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">Important Security Notice</h3>
+              <ul className="text-amber-700 dark:text-amber-300 space-y-1 text-sm">
                 <li>• <strong>Keep your secret key private</strong> - Never share it with anyone</li>
-                <li>• <strong>Store securely on your Kindle</strong> - Copy to root directory as '<code className="bg-amber-100 px-1 rounded">.kindle_secret.kindle_clippings</code>' file.</li>
+                <li>• <strong>Store securely on your Kindle</strong> - Copy to root directory as '<code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">.kindle_secret.kindle_clippings</code>' file.</li>
                 <li>• <strong>Revoke if compromised</strong> - Delete and regenerate if you suspect unauthorized access</li>
                 <li>• <strong>Jailbroken Kindle required</strong> - This feature requires a modified Kindle device</li>
               </ul>
@@ -184,28 +184,28 @@ export default function KindleSecret() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white dark:bg-card rounded-lg shadow-lg p-8">
           {secretData ? (
             /* Existing Secret Display */
             <div className="space-y-6">
               <div className="text-center">
-                <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
                   <Key className="w-4 h-4" />
                   Secret Key Active
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Kindle Secret</h2>
-                <p className="text-gray-600">Generated on {new Date(secretData.createdAt).toLocaleDateString()}</p>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-2">Your Kindle Secret</h2>
+                <p className="text-gray-600 dark:text-muted-foreground">Generated on {new Date(secretData.createdAt).toLocaleDateString()}</p>
               </div>
 
               {/* User ID Section */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">User ID</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-foreground">User ID</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={showUserId ? (secretData?.userId || '') : maskUserId(secretData?.userId || '')}
                     readOnly
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800 font-mono"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-border rounded-md bg-gray-50 dark:bg-muted text-gray-800 dark:text-foreground font-mono"
                   />
                   <button
                     onClick={() => setShowUserId(!showUserId)}
@@ -226,13 +226,13 @@ export default function KindleSecret() {
 
               {/* Secret Key Section - also update with fallbacks */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Secret Key</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-foreground">Secret Key</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={showSecret ? (secretData?.secret || '') : maskSecret(secretData?.secret || '')}
                     readOnly
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800 font-mono"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-border rounded-md bg-gray-50 dark:bg-muted text-gray-800 dark:text-foreground font-mono"
                   />
                   <button
                     onClick={() => setShowSecret(!showSecret)}
@@ -260,7 +260,7 @@ export default function KindleSecret() {
                   <Download className="w-5 h-5" />
                   Download Secret File
                 </button>
-                
+
                 <button
                   onClick={deleteSecret}
                   disabled={deleting}
@@ -284,9 +284,9 @@ export default function KindleSecret() {
             /* No Secret - Generate New */
             <div className="text-center space-y-6">
               <div>
-                <Key className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">No Kindle Secret Found</h2>
-                <p className="text-gray-600 max-w-md mx-auto">
+                <Key className="w-20 h-20 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-foreground mb-2">No Kindle Secret Found</h2>
+                <p className="text-gray-600 dark:text-muted-foreground max-w-md mx-auto">
                   Generate a secret key to enable direct uploads from your jailbroken Kindle device.
                 </p>
               </div>
@@ -314,9 +314,9 @@ export default function KindleSecret() {
 
         {/* Instructions Section */}
         {secretData && (
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-800 mb-4">Setup Instructions</h3>
-            <div className="space-y-3 text-blue-700">
+          <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-4">Setup Instructions</h3>
+            <div className="space-y-3 text-blue-700 dark:text-blue-300">
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
                 <p>Download the secret file using the button above</p>
@@ -327,7 +327,7 @@ export default function KindleSecret() {
               </div>
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                <p>Ensure the filename is exactly: <code className="bg-blue-100 px-1 rounded">.kindle_secret.kindle_clippings</code></p>
+                <p>Ensure the filename is exactly: <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">.kindle_secret.kindle_clippings</code></p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
@@ -340,12 +340,12 @@ export default function KindleSecret() {
             </div>
 
             {/* File Format Information */}
-            <div className="mt-4 p-3 bg-blue-100 rounded-md">
-              <h4 className="text-sm font-semibold text-blue-800 mb-1">File Format:</h4>
-              <code className="text-xs text-blue-700 font-mono">
+            <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900/40 rounded-md">
+              <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">File Format:</h4>
+              <code className="text-xs text-blue-700 dark:text-blue-300 font-mono">
                 {secretData.userId},{maskSecret(secretData.secret)},{import.meta.env.VITE_BACKEND_URL}
               </code>
-              <p className="text-xs text-blue-600 mt-1">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 Format: UserID, Secret Key, Server URL (comma-separated)
               </p>
             </div>

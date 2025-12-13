@@ -35,7 +35,7 @@ const whatsNewData = [
 			"Added Strict Punctuation and Show Quotes options in Book Online View -> View Filters.",
 			"Added URL filtering to show highlighted working urls only from a book."
 		]
-		
+
 	},
 	{
 		version: "v3.2.0",
@@ -132,43 +132,44 @@ const whatsNewData = [
 		date: "2025-06-12",
 		changes: [
 			"File Upload & Processing.",
-      "PDF Generation for Highlights.",
-      "Switched to Processing highlights using HTML->PDF",
-      "Added Privacy: Backend deletes data and does not generate zip file.",  
-    ],
+			"PDF Generation for Highlights.",
+			"Switched to Processing highlights using HTML->PDF",
+			"Added Privacy: Backend deletes data and does not generate zip file.",
+		],
 	},
-  {
-    version: "0.1.0 (BETA)",
-    date: "2024-12-01",
-    changes: [
-      "Initial Release with basic features.",
-      "Backend generates zip file.",
-      "Processing highlights using MD->PDF via md-to-pdf library",
-    ],
-  },
+	{
+		version: "0.1.0 (BETA)",
+		date: "2024-12-01",
+		changes: [
+			"Initial Release with basic features.",
+			"Backend generates zip file.",
+			"Processing highlights using MD->PDF via md-to-pdf library",
+		],
+	},
 ];
 
 export default function WhatsNew() {
 	return (
-		// bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 This gives the gradient like look to the page background
-		<div className="flex flex-col min-h-[89vh] bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30">
+		// bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 This gives the gradient like look to the page background
+		<div className="flex flex-col min-h-[89vh] bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10">
 			<div className="flex-1 max-w-xl mx-auto py-10 px-4 w-full">
-				<h1 className="text-3xl font-bold mb-8 text-center text-royal-700">
+				<h1 className="text-3xl font-bold mb-8 text-center text-royal-700 dark:text-royal-400">
 					What's New
 				</h1>
-				<div className="relative border-l-2 border-royal-300 pl-8 flex flex-col gap-12">
+				<div className="relative border-l-2 border-royal-300 dark:border-royal-700 pl-8 flex flex-col gap-12">
 					{whatsNewData.map((entry, idx) => (
 						<div key={entry.version} className="relative group">
 							{/* Timeline dot */}
-							<span className="absolute -left-5 top-2 w-4 h-4 rounded-full bg-royal-500 border-4 border-white shadow group-hover:scale-110 transition-transform"></span>
-							<div className="bg-white rounded-lg shadow p-5">
-								<h2 className="text-xl font-semibold text-royal-700 flex items-center gap-2">
+							<span className="absolute -left-5 top-2 w-4 h-4 rounded-full bg-royal-500 border-4 border-white dark:border-card shadow group-hover:scale-110 transition-transform"></span>
+							<div className="bg-white dark:bg-card rounded-lg shadow p-5 border border-transparent dark:border-border">
+
+								<h2 className="text-xl font-semibold text-royal-700 dark:text-royal-400 flex items-center gap-2">
 									{entry.version}
-									<span className="text-xs text-gray-400 font-normal">
+									<span className="text-xs text-gray-400 dark:text-muted-foreground font-normal">
 										{entry.date}
 									</span>
 								</h2>
-								<ul className="list-disc ml-6 mt-2 text-gray-700">
+								<ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-foreground">
 									{entry.changes.map((change, idx) => (
 										<li key={idx}>{change}</li>
 									))}

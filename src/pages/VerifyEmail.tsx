@@ -49,13 +49,13 @@ const VerifyEmail = () => {
   }, [status, countdown, navigate]);
 
   return (
-    <div className="min-h-[89vh] flex flex-col items-center justify-center bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 p-6">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 glass-effect text-center">
+    <div className="min-h-[89vh] flex flex-col items-center justify-center bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10 p-6">
+      <div className="w-full max-w-md bg-card dark:border dark:border-border rounded-2xl shadow-xl p-8 glass-effect text-center text-foreground">
         {status === "pending" && <div>Verifying your email...</div>}
         {status === "success" && (
           <>
             <div className="text-green-600 font-semibold mb-4">{message}</div>
-            <div className="text-gray-700 mb-4">    
+            <div className="text-gray-700 mb-4">
               Redirecting you to login in {countdown}...
             </div>
             <Button className="w-full bg-royal-500 text-white hover:bg-royal-600" onClick={() => navigate("/auth")}>

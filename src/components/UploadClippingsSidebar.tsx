@@ -40,21 +40,21 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
 
   return (
     <div
-      className={`flex flex-col gap-8 relative bg-white/0`}
+      className={`flex flex-col gap-8 relative bg-background/0`}
       style={
         isDesktop
           ? {
-              minHeight: "calc(100vh - 3rem)",
-              height: "100%",
-              justifyContent: "flex-start",
-            }
+            minHeight: "calc(100vh - 3rem)",
+            height: "100%",
+            justifyContent: "flex-start",
+          }
           : undefined
       }
     >
       {/* X Close Button for mobile, if requested */}
       {showCloseButton && onCloseSidebar && (
         <button
-          className="absolute top-2 right-2 text-2xl font-bold text-royal-700 bg-transparent border-none cursor-pointer z-50 hover:text-royal-900 transition-colors"
+          className="absolute top-2 right-2 text-2xl font-bold text-royal-700 dark:text-royal-400 bg-transparent border-none cursor-pointer z-50 hover:text-royal-900 dark:hover:text-royal-300 transition-colors"
           onClick={onCloseSidebar}
           aria-label="Close sidebar"
           style={{ background: "none" }}
@@ -75,7 +75,7 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
         )}
       </div>
       {/* --- Last Uploaded File Section --- */}
-      <div className="text-xs text-gray-700 text-center">
+      <div className="text-xs text-gray-700 dark:text-muted-foreground text-center">
         <div className="font-semibold mb-1">Last Uploaded:</div>
         {lastFile ? (
           <div>
@@ -90,12 +90,12 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
             <span className="text-gray-500">
               {lastFile.lastModified
                 ? (() => {
-                    const d = new Date();
-                    const day = String(d.getDate()).padStart(2, "0");
-                    const month = String(d.getMonth() + 1).padStart(2, "0");
-                    const year = d.getFullYear();
-                    return `${day}/${month}/${year}, ${d.toLocaleTimeString()}`;
-                  })()
+                  const d = new Date();
+                  const day = String(d.getDate()).padStart(2, "0");
+                  const month = String(d.getMonth() + 1).padStart(2, "0");
+                  const year = d.getFullYear();
+                  return `${day}/${month}/${year}, ${d.toLocaleTimeString()}`;
+                })()
                 : "Unknown"}
             </span>
           </div>
@@ -121,7 +121,7 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
             {isUploading ? "Uploading..." : "Submit File"}
           </button>
           <div className="text-xs text-gray-500 text-center mt-1">
-              Uploading a new Clippings file will use 1 coin for each unique book highlighted.
+            Uploading a new Clippings file will use 1 coin for each unique book highlighted.
           </div>
         </>
       )}

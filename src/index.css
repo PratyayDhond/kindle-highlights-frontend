@@ -53,10 +53,10 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 0 0% 18%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 0 0% 18%;
     --card-foreground: 210 40% 98%;
 
     --popover: 222.2 84% 4.9%;
@@ -107,5 +107,11 @@
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(181, 150, 229, 0.2);
     box-shadow: 0 8px 32px rgba(181, 150, 229, 0.1);
+  }
+
+  .dark .glass-effect {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(181, 150, 229, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
 }

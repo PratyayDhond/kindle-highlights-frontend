@@ -6,7 +6,7 @@ interface EditHighlightModalProps {
   highlight: any;
   onSave: (updatedHighlight: any) => void;
   onCancel: () => void;
-}   
+}
 
 const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
   isOpen,
@@ -58,9 +58,9 @@ const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-card rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-border">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">Edit Highlight</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-foreground">Edit Highlight</h3>
           <button
             onClick={handleCancel}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -72,7 +72,7 @@ const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
         <form onSubmit={handleSubmit}>
           {/* Highlight Text */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">
               Highlight Text *
             </label>
             <textarea
@@ -80,7 +80,7 @@ const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, highlight: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent resize-vertical"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-md focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent resize-vertical bg-transparent dark:text-foreground"
               rows={5}
               placeholder="Enter highlight text..."
               required
@@ -96,7 +96,7 @@ const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
               type="text"
               value={formData.type === "highlight" ? "Highlight" : "Note"}
               readOnly
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-md bg-gray-50 dark:bg-muted text-gray-500 dark:text-muted-foreground cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">
               Type cannot be modified
@@ -177,10 +177,10 @@ const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
               value={
                 formData.timestamp
                   ? (() => {
-                      const date = new Date(formData.timestamp);
-                      if (isNaN(date.getTime())) return "N/A";
-                      return date.toLocaleString();
-                    })()
+                    const date = new Date(formData.timestamp);
+                    if (isNaN(date.getTime())) return "N/A";
+                    return date.toLocaleString();
+                  })()
                   : "N/A"
               }
               readOnly
@@ -196,7 +196,7 @@ const EditHighlightModal: React.FC<EditHighlightModalProps> = ({
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-gray-600 dark:text-muted-foreground border border-gray-300 dark:border-border rounded-md hover:bg-gray-50 dark:hover:bg-muted transition-colors"
             >
               Cancel
             </button>

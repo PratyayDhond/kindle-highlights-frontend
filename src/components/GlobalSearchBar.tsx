@@ -31,15 +31,15 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   }, []);
 
   return (
-    <div className={`flex items-center gap-2 bg-white rounded-lg shadow px-3 py-2 mb-6 border border-gray-200 ${className}`}>
-      <Search className="w-4 h-4 text-gray-400" />
+    <div className={`flex items-center gap-2 bg-white dark:bg-card rounded-lg shadow px-3 py-2 mb-6 border border-gray-200 dark:border-border ${className}`}>
+      <Search className="w-4 h-4 text-gray-400 dark:text-muted-foreground" />
       <input
         ref={inputRef}
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 outline-none bg-transparent text-gray-700"
+        className="flex-1 outline-none bg-transparent text-gray-700 dark:text-foreground placeholder:text-muted-foreground"
       />
     </div>
   );
