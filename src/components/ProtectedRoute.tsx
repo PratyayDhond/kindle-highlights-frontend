@@ -58,7 +58,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           />
         </svg>
         {/* Rotating message */}
-        <div className="text-lg text-gray-700 text-center max-w-xs">
+        <div className="text-lg text-gray-700 dark:text-foreground text-center max-w-xs">
           {AUTH_MESSAGES[messageIndex]}
         </div>
       </div>
