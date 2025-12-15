@@ -60,16 +60,16 @@ const StagingArea: React.FC<StagingAreaProps> = ({
             <div
               key={op.id}
               className={`p-3 rounded border-l-4 ${op.type === 'delete'
-                  ? 'border-red-400 bg-red-50'
-                  : 'border-blue-400 bg-blue-50'
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-500'
+                : 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
                 }`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs font-semibold px-2 py-1 rounded ${op.type === 'delete'
-                        ? 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-200'
-                        : 'bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200'
+                      ? 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-200'
+                      : 'bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200'
                       }`}>
                       {op.type.toUpperCase()}
                     </span>

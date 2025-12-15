@@ -61,11 +61,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, selectedFile, dis
           className={`
             relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300
             ${isDragOver
-              ? 'border-royal-500 bg-royal-50'
-              : 'border-royal-300 hover:border-royal-400'
+              ? 'border-royal-500 bg-royal-50 dark:bg-royal-900/20'
+              : 'border-royal-300 hover:border-royal-400 dark:border-royal-700 dark:hover:border-royal-600'
             }
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-royal-50/50'}
-            bg-white shadow-sm
+            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-royal-50/50 dark:hover:bg-royal-900/10'}
+            bg-white dark:bg-card shadow-sm
           `}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}

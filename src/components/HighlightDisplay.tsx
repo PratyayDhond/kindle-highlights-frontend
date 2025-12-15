@@ -71,16 +71,16 @@ const HighlightDisplay: React.FC<HighlightDisplayProps> = ({
       ref={setHighlightRef(index)}
       className={`bg-white dark:bg-card rounded-lg shadow p-4 border-l-4 relative ${stagedOp
         ? stagedOp.type === 'edit'
-          ? 'border-blue-400 bg-blue-50/30'
-          : 'border-orange-400'
-        : 'border-royal-400'
+          ? 'border-blue-400 bg-blue-50/30 dark:bg-blue-900/10 dark:border-blue-500'
+          : 'border-orange-400 bg-orange-50/30 dark:bg-orange-900/10 dark:border-orange-500'
+        : 'border-royal-400 dark:border-royal-600'
         }`}
     >
       {/* Staging indicator */}
       {stagedOp && (
         <div className={`absolute top-2 right-2 px-2 py-1 text-xs rounded ${stagedOp.type === 'edit'
-          ? 'bg-blue-200 text-blue-800'
-          : 'bg-orange-200 text-orange-800'
+          ? 'bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+          : 'bg-orange-200 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
           }`}>
           {stagedOp.type === 'edit' ? 'EDITED' : 'DELETED'}
         </div>

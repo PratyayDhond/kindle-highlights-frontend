@@ -81,13 +81,12 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
           <div>
             <span className="font-medium">{lastFile.name}</span>
             <br />
-            <span className="text-gray-400">
+            <span className="text-gray-400 dark:text-muted-foreground/70">
               {(lastFile.size / 1024).toFixed(1)} KB
             </span>
             <br />
             <div className="font-semibold mb-1">Uploaded On:</div>
-
-            <span className="text-gray-500">
+            <span className="text-gray-500 dark:text-muted-foreground">
               {lastFile.lastModified
                 ? (() => {
                   const d = new Date();
@@ -100,7 +99,7 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
             </span>
           </div>
         ) : (
-          <span className="text-gray-400">No file uploaded yet.</span>
+          <span className="text-gray-400 dark:text-muted-foreground/50">No file uploaded yet.</span>
         )}
       </div>
       {/* --- Upload Component Section --- */}
@@ -113,23 +112,24 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
       {lastFile && (
         <>
           <button
-            className="w-full bg-royal-700 text-white py-2 rounded-lg font-semibold shadow hover:bg-royal-800 transition mb-1 mt-2"
+            className="w-full bg-royal-600 text-white py-2 rounded-lg font-semibold shadow hover:bg-royal-700 transition mb-1 mt-2"
             onClick={handleFileSubmit}
             disabled={isUploading}
             type="button"
           >
             {isUploading ? "Uploading..." : "Submit File"}
           </button>
-          <div className="text-xs text-gray-500 text-center mt-1">
-            Uploading a new Clippings file will use 1 coin for each unique book highlighted.
+          <div className="text-xs text-gray-500 dark:text-muted-foreground text-center mt-1">
+            Uploading a new Clippings file will use {import.meta.env.VITE_FILE_UPLOAD_COST || 1} coin for each unique book highlighted.
           </div>
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
 export default UploadClippingsSidebar;
 
-// #todo make the button background color lighter shade of purple in default
-// #todo Make the price for uploading highlights for user profile dynamic from env Variable.
+// #todo make the button background color lighter shade of purple in default - done
+// #todo Make the price for uploading highlights for user profile dynamic from env Variable -done
