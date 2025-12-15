@@ -73,11 +73,11 @@ const StagingArea: React.FC<StagingAreaProps> = ({
                       }`}>
                       {op.type.toUpperCase()}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(op.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-foreground line-clamp-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-900 line-clamp-2">
                     {op.type === 'edit'
                       ? op.updatedHighlight?.highlight || op.originalHighlight.highlight
                       : op.originalHighlight.highlight
