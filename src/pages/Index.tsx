@@ -305,7 +305,7 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className="glass-effect rounded-2xl p-8 shadow-xl">
+        <div className=" rounded-2xl p-8 shadow-xl">
           {processingState === 'idle' && (
             <div className="space-y-8">
               <FileUpload

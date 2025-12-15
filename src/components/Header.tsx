@@ -77,7 +77,7 @@ const Header: React.FC = () => {
           Kindle Integration
         </Link>
       </nav>
-      <div className="ml-4">
+      <div className="ml-4 mr-6">
         <ThemeToggle />
       </div>
     </header>
