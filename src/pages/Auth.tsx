@@ -190,9 +190,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-[89vh] flex flex-col items-center justify-center bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 p-6">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 glass-effect">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+    <div className="min-h-[89vh] flex flex-col items-center justify-center bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10 p-6">
+      <div className="w-full max-w-md bg-card dark:border dark:border-border rounded-2xl shadow-xl p-8 glass-effect">
+        <h2 className="text-3xl font-bold text-center text-foreground mb-6">
           Login to Kindle Clippings
         </h2>
         <div className="space-y-4">
@@ -208,9 +208,9 @@ const Auth = () => {
                 size="large"
               />
               <div className="flex items-center my-4">
-                <div className="flex-grow border-t border-gray-200" />
-                <span className="mx-2 text-gray-400 text-xs">or</span>
-                <div className="flex-grow border-t border-gray-200" />
+                <div className="flex-grow border-t border-border" />
+                <span className="mx-2 text-muted-foreground text-xs">or</span>
+                <div className="flex-grow border-t border-border" />
               </div>
               <Button
                 onClick={() => setAuthMode("login")}
@@ -240,7 +240,7 @@ const Auth = () => {
                   placeholder="Password"
                   value={form.password}
                   onChange={handleInputChange}
-                  className="w-full border rounded px-3 py-2 pr-10"
+                  className="w-full border border-input bg-background rounded px-3 py-2 pr-10"
                   required
                 />
                 <button
@@ -286,7 +286,7 @@ const Auth = () => {
                   placeholder="Email"
                   value={form.email}
                   onChange={handleInputChange}
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border border-input bg-background rounded px-3 py-2"
                   required
                 />
                 {emailError && (
@@ -318,7 +318,7 @@ const Auth = () => {
                   placeholder="Password"
                   value={form.password}
                   onChange={handleInputChange}
-                  className="w-full border rounded px-3 py-2 pr-10"
+                  className="w-full border border-input bg-background rounded px-3 py-2 pr-10"
                   required
                 />
                 <button
@@ -337,7 +337,7 @@ const Auth = () => {
                   placeholder="Confirm Password"
                   value={form.confirmPassword}
                   onChange={handleInputChange}
-                  className="w-full border rounded px-3 py-2 pr-10"
+                  className="w-full border border-input bg-background rounded px-3 py-2 pr-10"
                   required
                 />
                 <button

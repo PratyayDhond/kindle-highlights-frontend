@@ -25,10 +25,10 @@ const Unsubscribe: React.FC = () => {
       } else {
         setUnsubscribed(false);
         console.log(response);
-        if(response.status === 400 && data.message === "User already unsubscribed from newsletter"){
-            console.log("Here")
-            setConsent(false);
-            setUnsubscribed(true);
+        if (response.status === 400 && data.message === "User already unsubscribed from newsletter") {
+          console.log("Here")
+          setConsent(false);
+          setUnsubscribed(true);
         }
         toast.error(data.message || "Something went wrong. Please try again.");
       }
@@ -40,9 +40,9 @@ const Unsubscribe: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4">
-      <h1 className="text-3xl font-bold mb-4 text-royal-700">Unsubscribe from Newsletter</h1>
-      <p className="mb-6 text-gray-600 text-center max-w-md">
+    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4 bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10">
+      <h1 className="text-3xl font-bold mb-4 text-royal-700 dark:text-royal-400">Unsubscribe from Newsletter</h1>
+      <p className="mb-6 text-gray-600 dark:text-muted-foreground text-center max-w-md">
         {user?.name ? ` ${user.name}, we're sorry to see you go!` : "We're sorry to see you go!"} Click below to opt out of the daily highlights newsletter for '{user?.email}'.
       </p>
       <form
@@ -53,7 +53,7 @@ const Unsubscribe: React.FC = () => {
           handleUnsubscribe();
         }}
       >
-        <label className="flex items-start gap-2 text-sm text-gray-700">
+        <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-foreground">
           <input
             type="checkbox"
             checked={consent}
@@ -75,7 +75,7 @@ const Unsubscribe: React.FC = () => {
       </form>
       {unsubscribed && (
         <p className="mt-6 text-green-600 text-center text-sm">
-          You have been unsubscribed. You can re-subscribe anytime from the <a href="/newsletter" className="text-blue-600 underline">newsletter</a> page.
+          You have been unsubscribed. You can re-subscribe anytime from the <a href="/newsletter" className="text-blue-600 dark:text-blue-400 underline">newsletter</a> page.
         </p>
       )}
     </div>

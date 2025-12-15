@@ -47,7 +47,7 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
   const handleRefresh = async () => {
     setIsRefreshing(true);
     const results: { success: boolean; data?: any; error?: string }[] = [];
-    
+
     try {
       // Clear specified caches
       configs.forEach(config => {
@@ -56,7 +56,7 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
 
       // Handle special cache patterns
       const cacheKeys = configs.map(c => c.cacheKey);
-      
+
       // Clear scroll position caches if requested
       if (cacheKeys.includes('scroll_positions')) {
         Object.keys(localStorage).forEach(key => {
@@ -89,7 +89,7 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
             }
 
             const responseData = await response.json();
-            
+
             let dataToCache = responseData;
             if (config.dataPath) {
               dataToCache = responseData[config.dataPath];
@@ -113,8 +113,8 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
             results.push({ success: true, data: dataToCache });
           } catch (error) {
             console.error(`Failed to refresh ${config.cacheKey}:`, error);
-            results.push({ 
-              success: false, 
+            results.push({
+              success: false,
               error: error instanceof Error ? error.message : 'Unknown error'
             });
           }
@@ -141,8 +141,8 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
     } catch (error) {
       console.error('Refresh failed:', error);
       toast.error('Failed to refresh data. Please try again.');
-      results.push({ 
-        success: false, 
+      results.push({
+        success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     } finally {
@@ -155,16 +155,16 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
       onClick={handleRefresh}
       disabled={isRefreshing}
       className={`
-        flex items-center justify-center gap-2 bg-white/80 shadow rounded font-semibold
-        text-royal-700 hover:bg-gray-100 transition-all duration-200
+        flex items-center justify-center gap-2 bg-white/80 dark:bg-card/80 shadow rounded font-semibold
+        text-royal-700 dark:text-royal-400 hover:bg-gray-100 dark:hover:bg-muted transition-all duration-200
         ${sizeClasses[size]}
         ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}
         ${className}
       `}
       title="Refresh cached data"
     >
-      <RefreshCw 
-        className={`${iconSizes[size]} ${isRefreshing ? 'animate-spin' : ''}`} 
+      <RefreshCw
+        className={`${iconSizes[size]} ${isRefreshing ? 'animate-spin' : ''}`}
       />
     </button>
   );

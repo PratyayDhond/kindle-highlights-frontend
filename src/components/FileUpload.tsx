@@ -60,12 +60,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, selectedFile, dis
         <div
           className={`
             relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300
-            ${isDragOver 
-              ? 'border-royal-500 bg-royal-50' 
-              : 'border-royal-300 hover:border-royal-400'
+            ${isDragOver
+              ? 'border-royal-500 bg-royal-50 dark:bg-royal-900/20'
+              : 'border-royal-300 hover:border-royal-400 dark:border-royal-700 dark:hover:border-royal-600'
             }
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-royal-50/50'}
-            bg-white shadow-sm
+            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-royal-50/50 dark:hover:bg-royal-900/10'}
+            bg-white dark:bg-card shadow-sm
           `}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
@@ -80,24 +80,24 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, selectedFile, dis
             disabled={disabled}
           />
           <Upload className="mx-auto h-12 w-12 text-royal-500 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-foreground mb-2">
             Upload your Kindle clippings
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
             Drag and drop your clippings.txt file here, or click to browse
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-muted-foreground">
             Only .txt files are accepted
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl p-6 animate-fade-in shadow-sm border border-royal-200">
+        <div className="bg-white dark:bg-card rounded-xl p-6 animate-fade-in shadow-sm border border-royal-200 dark:border-royal-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FileText className="h-8 w-8 text-royal-500" />
               <div>
-                <p className="font-medium text-gray-800">{selectedFile.name}</p>
-                <p className="text-sm text-gray-600">
+                <p className="font-medium text-gray-800 dark:text-foreground">{selectedFile.name}</p>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground">
                   {(selectedFile.size / 1024).toFixed(1)} KB
                 </p>
               </div>

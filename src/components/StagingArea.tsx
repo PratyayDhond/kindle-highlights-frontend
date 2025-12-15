@@ -21,13 +21,13 @@ const StagingArea: React.FC<StagingAreaProps> = ({
   onCommitAll
 }) => {
   return (
-    <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+    <div className="mb-6 bg-gray-50 dark:bg-card border border-gray-200 dark:border-border rounded-lg p-4">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-semibold text-gray-800">Staging Area</h3>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-foreground">Staging Area</h3>
         <div className="flex gap-2">
           <button
             onClick={onClearAll}
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100"
+            className="px-3 py-1 text-sm border border-gray-300 dark:border-border rounded hover:bg-gray-100 dark:hover:bg-muted dark:text-foreground"
             disabled={stagingArea.length === 0}
           >
             Clear All
@@ -51,44 +51,42 @@ const StagingArea: React.FC<StagingAreaProps> = ({
           </button>
         </div>
       </div>
-      
+
       {stagingArea.length === 0 ? (
-        <p className="text-gray-500 text-sm">No pending changes</p>
+        <p className="text-gray-500 dark:text-muted-foreground text-sm">No pending changes</p>
       ) : (
         <div className="space-y-2 max-h-[60vh] overflow-y-auto">
           {stagingArea.map((op) => (
             <div
               key={op.id}
-              className={`p-3 rounded border-l-4 ${
-                op.type === 'delete' 
-                  ? 'border-red-400 bg-red-50' 
-                  : 'border-blue-400 bg-blue-50'
-              }`}
+              className={`p-3 rounded border-l-4 ${op.type === 'delete'
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-500'
+                : 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
+                }`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                      op.type === 'delete' 
-                        ? 'bg-red-200 text-red-800' 
-                        : 'bg-blue-200 text-blue-800'
-                    }`}>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded ${op.type === 'delete'
+                      ? 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-200'
+                      : 'bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200'
+                      }`}>
                       {op.type.toUpperCase()}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(op.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700 line-clamp-2">
-                    {op.type === 'edit' 
+                  <p className="text-sm text-gray-700 dark:text-gray-900 line-clamp-2">
+                    {op.type === 'edit'
                       ? op.updatedHighlight?.highlight || op.originalHighlight.highlight
                       : op.originalHighlight.highlight
                     }
                   </p>
                   {op.type === 'edit' && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Original: {isDesktop 
-                        ? op.originalHighlight.highlight.substring(0,255) + (op.originalHighlight.highlight.length > 255 ? '...' : '') 
+                    <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">
+                      Original: {isDesktop
+                        ? op.originalHighlight.highlight.substring(0, 255) + (op.originalHighlight.highlight.length > 255 ? '...' : '')
                         : op.originalHighlight.highlight.substring(0, 50) + '...'
                       }
                     </p>

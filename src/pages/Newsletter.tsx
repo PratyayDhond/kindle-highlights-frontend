@@ -25,7 +25,7 @@ const Newsletter: React.FC = () => {
       } else {
         setSubscribed(false);
         console.log(response);
-        if(response.status === 400 && data.message === "User already subscribed to newsletter") {
+        if (response.status === 400 && data.message === "User already subscribed to newsletter") {
           setConsent(false);
           setSubscribed(true);
           toast.info("You are already subscribed to the newsletter.");
@@ -41,9 +41,9 @@ const Newsletter: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4">
-      <h1 className="text-3xl font-bold mb-4 text-royal-700">Your Daily Highlights Newsletter</h1>
-      <p className="mb-6 text-gray-600 text-center max-w-md">
+    <div className="min-h-[89vh] flex flex-col items-center justify-center px-4 bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10">
+      <h1 className="text-3xl font-bold mb-4 text-royal-700 dark:text-royal-400">Your Daily Highlights Newsletter</h1>
+      <p className="mb-6 text-gray-600 dark:text-muted-foreground text-center max-w-md">
         Start receiving your daily dose of Kindle highlights - straight to your inbox.
       </p>
       <form
@@ -54,7 +54,7 @@ const Newsletter: React.FC = () => {
           handleSubscribe();
         }}
       >
-        <label className="flex items-start gap-2 text-sm text-gray-700">
+        <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-foreground">
           <input
             type="checkbox"
             checked={consent}
@@ -68,20 +68,20 @@ const Newsletter: React.FC = () => {
         </label>
         <button
           type="submit"
-          className="bg-royal-700 text-white py-2 rounded hover:bg-royal-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-royal-700 text-white py-2 rounded hover:bg-royal-800 dark:hover:bg-royal-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading || !consent}
         >
           {loading ? "Subscribing..." : "Subscribe"}
         </button>
       </form>
-      <blockquote className="mt-8 mb-2 italic text-gray-500 max-w-md border-l-4 border-royal-300 pl-4 text-sm">
+      <blockquote className="mt-8 mb-2 italic text-gray-500 dark:text-muted-foreground max-w-md border-l-4 border-royal-300 dark:border-royal-700 pl-4 text-sm">
         “The next best thing to the enjoyment of a good time is the recollection of it.”
         <br />
-        <span className="block mt-2 text-xs text-gray-400 not-italic mr-6 text-right">
+        <span className="block mt-2 text-xs text-gray-400 dark:text-gray-500 not-italic mr-6 text-right">
           — James Lendall Basford
         </span>
       </blockquote>
-      <div className="text-xs text-gray-500 max-w-md mb-6 text-center">
+      <div className="text-xs text-gray-500 dark:text-muted-foreground max-w-md mb-6 text-center">
         {user?.email
           ? `The newsletter will be sent to ${user.email}.`
           : ""}

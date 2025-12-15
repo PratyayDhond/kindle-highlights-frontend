@@ -15,7 +15,7 @@ export default function BookOnlineView() {
   const location = useLocation();
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(location.state?.book || null);
-  
+
   // Early return if no book
   if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
 
@@ -57,21 +57,21 @@ export default function BookOnlineView() {
   // Filter highlights
   const filteredHighlights = book.highlights
     ? book.highlights
-        .filter((hl: any) => {
-          const stagedOp = isHighlightStaged(hl._id);
-          if (stagedOp?.type === 'delete' || stagedOp?.type === 'edit') return false;
-          
-          const isActive = hl.knowledge_end_date === null;
-          const matchesSearch = search
-            ? hl.highlight.toLowerCase().includes(search.toLowerCase())
-            : true;
-          const matchesType =
-            (showHighlights && hl.type === "highlight") ||
-            (showNotes && hl.type === "note") ||
-            (showUrlsOnly && hl.containsUrl);
-          return isActive && matchesSearch && matchesType;
-        })
-        .map((hl: any) => getEffectiveHighlight(hl))
+      .filter((hl: any) => {
+        const stagedOp = isHighlightStaged(hl._id);
+        if (stagedOp?.type === 'delete' || stagedOp?.type === 'edit') return false;
+
+        const isActive = hl.knowledge_end_date === null;
+        const matchesSearch = search
+          ? hl.highlight.toLowerCase().includes(search.toLowerCase())
+          : true;
+        const matchesType =
+          (showHighlights && hl.type === "highlight") ||
+          (showNotes && hl.type === "note") ||
+          (showUrlsOnly && hl.containsUrl);
+        return isActive && matchesSearch && matchesType;
+      })
+      .map((hl: any) => getEffectiveHighlight(hl))
     : [];
 
   // Effects
@@ -112,7 +112,7 @@ export default function BookOnlineView() {
   }, [book]);
 
   useEffect(() => {
-    if(filteredHighlights && filteredHighlights.length > 0 && !hasInitialScrolled) {
+    if (filteredHighlights && filteredHighlights.length > 0 && !hasInitialScrolled) {
       const savedPosition = getScrollPositionFromLocalCache(book._id);
       if (savedPosition !== null && savedPosition < filteredHighlights.length) {
         // Scroll to saved position
@@ -149,13 +149,13 @@ export default function BookOnlineView() {
   const makeUrlsClickable = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
     const parts = text.split(urlRegex);
-    
+
     return parts.map((part, index) => {
       const testRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/g;
       if (testRegex.test(part)) {
-        if(showQuotes && part.endsWith('"'))
+        if (showQuotes && part.endsWith('"'))
           part = part.slice(0, -1);
-        if(strictPunctuation && part.endsWith('.'))
+        if (strictPunctuation && part.endsWith('.'))
           part = part.slice(0, -1);
 
         const href = part.startsWith('www.') ? `https://${part}` : part;
@@ -167,19 +167,19 @@ export default function BookOnlineView() {
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 underline"
           >
-            {part} 
+            {part}
           </a>
         );
       }
-      
-      if(index === 0 && showQuotes && !part.startsWith('"')) {
+
+      if (index === 0 && showQuotes && !part.startsWith('"')) {
         part = `"${part}`;
       }
-      if(index === parts.length - 1 ){
-        if(strictPunctuation && !part.endsWith('.')) {
+      if (index === parts.length - 1) {
+        if (strictPunctuation && !part.endsWith('.')) {
           part += '.';
         }
-        if(showQuotes && !part.endsWith('"'))
+        if (showQuotes && !part.endsWith('"'))
           part += '"';
       }
       return part;
@@ -208,7 +208,7 @@ export default function BookOnlineView() {
         originalHighlight: editingHighlight,
         updatedHighlight: updatedHighlight,
       });
-      
+
       setIsEditModalOpen(false);
       setEditingHighlight(null);
     }
@@ -217,15 +217,15 @@ export default function BookOnlineView() {
   // Business logic functions
   function updateLocalBookData(successfulOperations: any[]) {
     if (!book || !book.highlights) return;
-    
+
     successfulOperations.forEach((successOp) => {
       const { operationId, highlightId, type } = successOp;
       const stagedOp = stagingArea.find(op => op.id === operationId);
       if (!stagedOp) return;
-      
+
       const highlightIndex = book.highlights.findIndex(hl => hl._id === highlightId);
       if (highlightIndex === -1) return;
-      
+
       if (type === 'edit' && stagedOp.updatedHighlight) {
         book.highlights[highlightIndex] = {
           ...book.highlights[highlightIndex],
@@ -240,7 +240,7 @@ export default function BookOnlineView() {
         // console.log(`Soft deleted highlight ${highlightId} locally`);
       }
     });
-    
+
     updateBookCache(book);
   }
 
@@ -277,183 +277,184 @@ export default function BookOnlineView() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4" ref={containerRef}>
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          className="flex items-center text-royal-600 hover:text-royal-800 transition-colors"
-          onClick={() => navigate("/dashboard")}
-          aria-label="Go back to dashboard"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="font-medium">Back to Dashboard</span>
-        </button>
-        
-        <button
-          onClick={() => setShowStagingArea(!showStagingArea)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
-            stagingArea.length > 0 
-              ? 'border-orange-300 bg-orange-50 text-orange-700' 
-              : 'border-gray-300 text-gray-600'
-          }`}
-        >
-          <Package className="w-4 h-4" />
-          <span>Staging ({stagingArea.length})</span>
-        </button>
-      </div>
-
-      {/* Staging Section */}
-      {showStagingArea && (
-        <StagingArea
-          stagingArea={stagingArea}
-          isCommitting={isCommitting}
-          isDesktop={isDesktop}
-          onRemoveOperation={removeFromStagingArea}
-          onClearAll={clearStagingArea}
-          onCommitAll={commitStagedOperations}
-        />
-      )}
-
-      {/* Book Title and Search */}
-      <h1 className="text-3xl font-bold text-royal-700 mb-2 text-center">{book.title}</h1>
-      <h2 className="text-lg text-gray-600 mb-8 text-center">by {book.author}</h2>
-      
-      <GlobalSearchBar
-        value={search}
-        onChange={setSearch}
-        placeholder="Search highlights..."
-      />
-
-      {/* Filters */}
-      <div className="flex gap-6 items-center mb-6 mt-2 justify-center">
-        <label className="flex items-center gap-2">
-          Show results for: 
-          <input
-            type="checkbox"
-            checked={showHighlights}
-            onChange={() => setShowHighlights((v) => !v)}
-            className="accent-royal-600"
-          />
-          <span>Highlights</span>
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={showNotes}
-            onChange={() => setShowNotes((v) => !v)}
-            className="accent-royal-600"
-          />
-          <span>Notes</span>
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={showUrlsOnly}
-            onChange={() => setShowUrlsOnly((v) => !v)}
-            className="accent-royal-600"
-          />
-          <span>Urls</span>
-        </label>
-      </div>
-
-      {/* View Filter */}
-      <div className="mb-6 justify-center">
-        <button
-          onClick={() => setIsViewFilterOpen(!isViewFilterOpen)}
-          className="flex items-center gap-2 text-royal-600 hover:text-royal-800 transition-colors mx-auto"
-        >
-          <span className="text-gray-600">View filter</span>
-          <svg
-            className={`w-4 h-4 transition-transform ${isViewFilterOpen ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <div className="min-h-screen bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10">
+      <div className="max-w-3xl mx-auto py-10 px-4" ref={containerRef}>
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <button
+            className="flex items-center text-royal-600 hover:text-royal-800 dark:text-royal-400 dark:hover:text-royal-300 transition-colors"
+            onClick={() => navigate("/dashboard")}
+            aria-label="Go back to dashboard"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        {isViewFilterOpen && (
-          <div className="flex gap-6 items-center mt-3 justify-center">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={showQuotes}
-                onChange={() => setShowQuotes((v) => !v)}
-                className="accent-royal-600"
-              />
-              <span>Enable double-quotes ("") in output</span>
-            </label>
-            <br />
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={strictPunctuation}
-                onChange={() => setStrictPunctuation((v) => !v)}
-                className="accent-royal-600"
-              />
-              <span>Add punctuation (.) to all quotes without one.</span>
-            </label>
-          </div>
-        )}
-      </div>
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            <span className="font-medium">Back to Dashboard</span>
+          </button>
 
-      {/* Highlights List */}
-      <div className="space-y-6 min-h-[60vh]">
-        {filteredHighlights && filteredHighlights.length > 0 ? (
-          (() => {
-            let highlightCount = 0;
-            let noteCount = 0;
-            
-            return filteredHighlights.map((hl: any, idx: number) => {
-              const stagedOp = isHighlightStaged(hl._id);
-              
-              let label = "Highlight";
-              if (hl.type === "note") {
-                noteCount += 1;
-                label = `Note ${noteCount}`;
-              } else {
-                highlightCount += 1;
-                label = `Highlight ${highlightCount}`;
-              }
-              
-              return (
-                <HighlightDisplay
-                  key={hl._id || idx}
-                  highlight={hl}
-                  index={idx}
-                  label={label}
-                  stagedOp={stagedOp}
-                  isDesktop={isDesktop}
-                  showQuotes={showQuotes}
-                  strictPunctuation={strictPunctuation}
-                  makeUrlsClickable={makeUrlsClickable}
-                  onEdit={handleEditIconClick}
-                  onDelete={handleDeleteIconClick}
-                  setHighlightRef={setHighlightRef}
+          <button
+            onClick={() => setShowStagingArea(!showStagingArea)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${stagingArea.length > 0
+                ? 'border-orange-300 bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300'
+                : 'border-gray-300 text-gray-600 dark:border-border dark:text-muted-foreground'
+              }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Staging ({stagingArea.length})</span>
+          </button>
+        </div>
+
+        {/* Staging Section */}
+        {showStagingArea && (
+          <StagingArea
+            stagingArea={stagingArea}
+            isCommitting={isCommitting}
+            isDesktop={isDesktop}
+            onRemoveOperation={removeFromStagingArea}
+            onClearAll={clearStagingArea}
+            onCommitAll={commitStagedOperations}
+          />
+        )}
+
+        {/* Book Title and Search */}
+        <h1 className="text-3xl font-bold text-royal-700 dark:text-royal-400 mb-2 text-center">{book.title}</h1>
+        <h2 className="text-lg text-gray-600 dark:text-muted-foreground mb-8 text-center">by {book.author}</h2>
+
+        <GlobalSearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search highlights..."
+        />
+
+        {/* Filters */}
+        <div className="flex gap-6 items-center mb-6 mt-2 justify-center">
+          <label className="flex items-center gap-2">
+            Show results for:
+            <input
+              type="checkbox"
+              checked={showHighlights}
+              onChange={() => setShowHighlights((v) => !v)}
+              className="accent-royal-600"
+            />
+            <span>Highlights</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showNotes}
+              onChange={() => setShowNotes((v) => !v)}
+              className="accent-royal-600"
+            />
+            <span>Notes</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showUrlsOnly}
+              onChange={() => setShowUrlsOnly((v) => !v)}
+              className="accent-royal-600"
+            />
+            <span>Urls</span>
+          </label>
+        </div>
+
+        {/* View Filter */}
+        <div className="mb-6 justify-center">
+          <button
+            onClick={() => setIsViewFilterOpen(!isViewFilterOpen)}
+            className="flex items-center gap-2 text-royal-600 hover:text-royal-800 dark:text-royal-400 dark:hover:text-royal-300 transition-colors mx-auto"
+          >
+            <span className="text-gray-600 dark:text-muted-foreground">View filter</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${isViewFilterOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {isViewFilterOpen && (
+            <div className="flex gap-6 items-center mt-3 justify-center">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showQuotes}
+                  onChange={() => setShowQuotes((v) => !v)}
+                  className="accent-royal-600"
                 />
-              );
-            });
-          })()
-        ) : (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No highlights found.</p>
-            <p className="text-gray-400 text-sm mt-2">
-              {search ? "Try adjusting your search or filters." : "This book has no highlights yet."}
-            </p>
-          </div>
-        )}
-      </div>
+                <span>Enable double-quotes ("") in output</span>
+              </label>
+              <br />
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={strictPunctuation}
+                  onChange={() => setStrictPunctuation((v) => !v)}
+                  className="accent-royal-600"
+                />
+                <span>Add punctuation (.) to all quotes without one.</span>
+              </label>
+            </div>
+          )}
+        </div>
 
-      {/* Edit Modal */}
-      <EditHighlightModal
-        isOpen={isEditModalOpen}
-        highlight={editingHighlight}
-        onSave={handleSaveOnEditComplete}
-        onCancel={() => {
-          setIsEditModalOpen(false);
-          setEditingHighlight(null);
-        }}
-      />
+        {/* Highlights List */}
+        <div className="space-y-6 min-h-[60vh]">
+          {filteredHighlights && filteredHighlights.length > 0 ? (
+            (() => {
+              let highlightCount = 0;
+              let noteCount = 0;
+
+              return filteredHighlights.map((hl: any, idx: number) => {
+                const stagedOp = isHighlightStaged(hl._id);
+
+                let label = "Highlight";
+                if (hl.type === "note") {
+                  noteCount += 1;
+                  label = `Note ${noteCount}`;
+                } else {
+                  highlightCount += 1;
+                  label = `Highlight ${highlightCount}`;
+                }
+
+                return (
+                  <HighlightDisplay
+                    key={hl._id || idx}
+                    highlight={hl}
+                    index={idx}
+                    label={label}
+                    stagedOp={stagedOp}
+                    isDesktop={isDesktop}
+                    showQuotes={showQuotes}
+                    strictPunctuation={strictPunctuation}
+                    makeUrlsClickable={makeUrlsClickable}
+                    onEdit={handleEditIconClick}
+                    onDelete={handleDeleteIconClick}
+                    setHighlightRef={setHighlightRef}
+                  />
+                );
+              });
+            })()
+          ) : (
+            <div className="text-center py-20">
+              <p className="text-gray-500 dark:text-muted-foreground text-lg">No highlights found.</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+                {search ? "Try adjusting your search or filters." : "This book has no highlights yet."}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Edit Modal */}
+        <EditHighlightModal
+          isOpen={isEditModalOpen}
+          highlight={editingHighlight}
+          onSave={handleSaveOnEditComplete}
+          onCancel={() => {
+            setIsEditModalOpen(false);
+            setEditingHighlight(null);
+          }}
+        />
+      </div>
     </div>
   );
 }

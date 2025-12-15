@@ -50,35 +50,35 @@ const Index = () => {
   }, [toastSonner]);
 
   useEffect(() => {
-      const fetchStats = async () => {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/stats`, {
-            credentials: "include",
-          });
-          if (!response.ok) throw new Error("Failed to fetch stats");
-          const data = await response.json();
-          setStats(data.stats || {
-            totalBooks: 0,
-            totalHighlights: 0,
-            avgHighlights: 0,
-            maxHighlights: 0,
-            updatedAt: new Date(),
-          });
-        } catch (err) {
-          setStats({
-            totalBooks: 0,
-            totalHighlights: 0,
-            avgHighlights: 0,
-            maxHighlights: 0,
-            updatedAt: new Date(),
-          });
-        }
-      };
-      // console.log(stats);
-      if(!stats)
-        fetchStats();
-    }, [setStats]); // Optionally, you can remove books if you want to fetch only on mount
-  
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/stats`, {
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to fetch stats");
+        const data = await response.json();
+        setStats(data.stats || {
+          totalBooks: 0,
+          totalHighlights: 0,
+          avgHighlights: 0,
+          maxHighlights: 0,
+          updatedAt: new Date(),
+        });
+      } catch (err) {
+        setStats({
+          totalBooks: 0,
+          totalHighlights: 0,
+          avgHighlights: 0,
+          maxHighlights: 0,
+          updatedAt: new Date(),
+        });
+      }
+    };
+    // console.log(stats);
+    if (!stats)
+      fetchStats();
+  }, [setStats]); // Optionally, you can remove books if you want to fetch only on mount
+
   useEffect(() => {
     if (coins === undefined) {
       // Only fetch if coins is undefined
@@ -89,7 +89,7 @@ const Index = () => {
         .then(data => {
           if (typeof data.coins === "number") setCoins(data.coins);
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [coins, setCoins]);
 
@@ -159,7 +159,7 @@ const Index = () => {
         return;
       }
 
-      if(response.status === 418){
+      if (response.status === 418) {
         const data = await response.json();
         toastSonner({
           title: "Processing Error",
@@ -259,12 +259,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-[89vh] bg-gradient-to-br from-white via-royal-100/30 to-royal-200/30 flex flex-col items-center justify-center p-6 relative">
+    <div className="min-h-[89vh] bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10 flex flex-col items-center justify-center p-6 relative">
       {/* Burger menu top left */}
       <div className="absolute top-6 left-8 z-50">
         <button
           onClick={() => setDashboardOpen(true)}
-          className="p-2 rounded-full bg-white shadow hover:bg-gray-100"
+          className="p-2 rounded-full bg-card dark:bg-card/50 shadow hover:bg-accent transition-colors"
         >
           <Menu className="h-6 w-6 text-royal-500" />
         </button>
@@ -289,23 +289,23 @@ const Index = () => {
           <div className="flex items-center justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-royal-500/20 animate-pulse-glow"></div>
-              <div className="relative bg-white rounded-full p-4 shadow-lg border border-royal-200">
+              <div className="relative bg-card rounded-full p-4 shadow-lg border border-royal-200 dark:border-royal-800">
                 <BookOpen className="h-8 w-8 text-royal-500" />
               </div>
             </div>
             <Sparkles className="h-6 w-6 text-royal-400 ml-2 animate-pulse" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Kindle Clippings
           </h1>
-          <p className="text-lg text-gray-600 max-w-lg mx-auto">
-            Transform your Kindle highlights into organized, downloadable formats. 
+          <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+            Transform your Kindle highlights into organized, downloadable formats.
             Upload your clippings.txt file and let us work our magic.
           </p>
         </div>
 
         {/* Main Content */}
-        <div className="glass-effect rounded-2xl p-8 shadow-xl">
+        <div className=" rounded-2xl p-8 shadow-xl">
           {processingState === 'idle' && (
             <div className="space-y-8">
               <FileUpload
@@ -323,7 +323,7 @@ const Index = () => {
                     onChange={e => setConsent(e.target.checked)}
                     className="accent-royal-500"
                   />
-                  <label htmlFor="dashboard-consent" className="text-sm text-gray-700 select-none">
+                  <label htmlFor="dashboard-consent" className="text-sm text-foreground select-none">
                     I agree to use '{selectedFile.name}' to personalize and display its content on my dashboard.
                   </label>
                 </div>
@@ -347,24 +347,24 @@ const Index = () => {
           {processingState === 'processing' && (
             <div>
               <ProcessingLoader />
-              <div className="w-full bg-gray-200 rounded-full h-4 mt-4">
+              <div className="w-full bg-gray-200 dark:bg-muted rounded-full h-4 mt-4">
                 <div
                   className="bg-royal-500 h-4 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="text-center mt-2 text-sm text-gray-600">  {progress.toFixed(2)}%</div>
+              <div className="text-center mt-2 text-sm text-muted-foreground">  {progress.toFixed(2)}%</div>
             </div>
           )}
 
           {processingState === 'completed' && (
             <div className="space-y-6">
-              <DownloadSection 
+              <DownloadSection
                 onDownload={handleDownload}
-                isDownloading={isDownloading} 
+                isDownloading={isDownloading}
                 hasDownloaded={hasDownloaded}
               />
-              
+
               <div className="text-center">
                 <Button
                   onClick={resetProcess}
@@ -379,12 +379,12 @@ const Index = () => {
         </div>
 
         <div className="text-center mt-8 animate-fade-in">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Your files are processed securely and never stored on our servers without your consent.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             <span className="font-semibold">No Clippings.txt file? No problem. </span>
-             Try the app using our{" "}
+            Try the app using our{" "}
             <a
               href="/My Clippings.txt"
               download="My Clippings.txt"

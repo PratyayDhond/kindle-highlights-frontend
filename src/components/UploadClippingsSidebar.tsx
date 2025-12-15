@@ -40,21 +40,21 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
 
   return (
     <div
-      className={`flex flex-col gap-8 relative bg-white/0`}
+      className={`flex flex-col gap-8 relative bg-background/0`}
       style={
         isDesktop
           ? {
-              minHeight: "calc(100vh - 3rem)",
-              height: "100%",
-              justifyContent: "flex-start",
-            }
+            minHeight: "calc(100vh - 3rem)",
+            height: "100%",
+            justifyContent: "flex-start",
+          }
           : undefined
       }
     >
       {/* X Close Button for mobile, if requested */}
       {showCloseButton && onCloseSidebar && (
         <button
-          className="absolute top-2 right-2 text-2xl font-bold text-royal-700 bg-transparent border-none cursor-pointer z-50 hover:text-royal-900 transition-colors"
+          className="absolute top-2 right-2 text-2xl font-bold text-royal-700 dark:text-royal-400 bg-transparent border-none cursor-pointer z-50 hover:text-royal-900 dark:hover:text-royal-300 transition-colors"
           onClick={onCloseSidebar}
           aria-label="Close sidebar"
           style={{ background: "none" }}
@@ -75,32 +75,31 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
         )}
       </div>
       {/* --- Last Uploaded File Section --- */}
-      <div className="text-xs text-gray-700 text-center">
+      <div className="text-xs text-gray-700 dark:text-muted-foreground text-center">
         <div className="font-semibold mb-1">Last Uploaded:</div>
         {lastFile ? (
           <div>
             <span className="font-medium">{lastFile.name}</span>
             <br />
-            <span className="text-gray-400">
+            <span className="text-gray-400 dark:text-muted-foreground/70">
               {(lastFile.size / 1024).toFixed(1)} KB
             </span>
             <br />
             <div className="font-semibold mb-1">Uploaded On:</div>
-
-            <span className="text-gray-500">
+            <span className="text-gray-500 dark:text-muted-foreground">
               {lastFile.lastModified
                 ? (() => {
-                    const d = new Date();
-                    const day = String(d.getDate()).padStart(2, "0");
-                    const month = String(d.getMonth() + 1).padStart(2, "0");
-                    const year = d.getFullYear();
-                    return `${day}/${month}/${year}, ${d.toLocaleTimeString()}`;
-                  })()
+                  const d = new Date();
+                  const day = String(d.getDate()).padStart(2, "0");
+                  const month = String(d.getMonth() + 1).padStart(2, "0");
+                  const year = d.getFullYear();
+                  return `${day}/${month}/${year}, ${d.toLocaleTimeString()}`;
+                })()
                 : "Unknown"}
             </span>
           </div>
         ) : (
-          <span className="text-gray-400">No file uploaded yet.</span>
+          <span className="text-gray-400 dark:text-muted-foreground/50">No file uploaded yet.</span>
         )}
       </div>
       {/* --- Upload Component Section --- */}
@@ -113,23 +112,24 @@ const UploadClippingsSidebar: React.FC<UploadClippingsSidebarProps> = ({
       {lastFile && (
         <>
           <button
-            className="w-full bg-royal-700 text-white py-2 rounded-lg font-semibold shadow hover:bg-royal-800 transition mb-1 mt-2"
+            className="w-full bg-royal-600 text-white py-2 rounded-lg font-semibold shadow hover:bg-royal-700 transition mb-1 mt-2"
             onClick={handleFileSubmit}
             disabled={isUploading}
             type="button"
           >
             {isUploading ? "Uploading..." : "Submit File"}
           </button>
-          <div className="text-xs text-gray-500 text-center mt-1">
-              Uploading a new Clippings file will use 1 coin for each unique book highlighted.
+          <div className="text-xs text-gray-500 dark:text-muted-foreground text-center mt-1">
+            Uploading a new Clippings file will use {import.meta.env.VITE_FILE_UPLOAD_COST || 1} coin for each unique book highlighted.
           </div>
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
 export default UploadClippingsSidebar;
 
-// #todo make the button background color lighter shade of purple in default
-// #todo Make the price for uploading highlights for user profile dynamic from env Variable.
+// #todo make the button background color lighter shade of purple in default - done
+// #todo Make the price for uploading highlights for user profile dynamic from env Variable -done

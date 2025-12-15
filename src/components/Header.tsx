@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Key } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navLinks = [
   { label: "Tool", path: "/" },
@@ -44,7 +45,7 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 px-2 py-3 flex items-center justify-center shadow-sm">
+    <header className="w-full bg-background dark:bg-card border-b border-border px-2 py-3 flex items-center justify-center shadow-sm transition-colors duration-300">
       <nav
         ref={navRef}
         className="
@@ -61,8 +62,8 @@ const Header: React.FC = () => {
             onClick={() => navigate(link.path)}
             className={`text-base font-medium px-2 py-1 rounded transition-colors whitespace-nowrap
               ${location.pathname === link.path
-                ? "text-royal-700 underline underline-offset-4"
-                : "text-gray-700 hover:text-royal-800"}
+                ? "text-royal-700 dark:text-royal-400 underline underline-offset-4"
+                : "text-muted-foreground hover:text-royal-800 dark:hover:text-royal-300"}
             `}
           >
             {link.label}
@@ -70,12 +71,15 @@ const Header: React.FC = () => {
         ))}
         <Link
           to="/kindle-secret"
-          className="flex items-center gap-2 text-royal-600 hover:text-royal-800"
+          className="flex items-center gap-2 text-royal-600 dark:text-royal-400 hover:text-royal-800 dark:hover:text-royal-300"
         >
           <Key className="w-4 h-4" />
           Kindle Integration
         </Link>
       </nav>
+      <div className="ml-4 mr-6">
+        <ThemeToggle />
+      </div>
     </header>
   );
 };

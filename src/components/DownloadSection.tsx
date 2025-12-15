@@ -14,19 +14,19 @@ const DownloadSection: React.FC<DownloadSectionProps> = ({ onDownload, isDownloa
     <div className="flex flex-col items-center justify-center py-12 animate-fade-in">
       <div className="relative mb-6">
         <div className="absolute inset-0 rounded-full bg-green-500/20 animate-pulse-glow"></div>
-        <div className="relative bg-white rounded-full p-6 shadow-lg border border-green-200">
+        <div className="relative bg-white dark:bg-card rounded-full p-6 shadow-lg border border-green-200 dark:border-green-800">
           <CheckCircle className="h-8 w-8 text-green-500" />
         </div>
       </div>
-      
-      <h3 className="text-xl font-semibold text-gray-800 mb-2">
+
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-foreground mb-2">
         Your highlights are ready!
       </h3>
-      <p className="text-gray-600 text-center max-w-md mb-8">
-        Your Kindle clippings have been processed and organized. 
+      <p className="text-gray-600 dark:text-muted-foreground text-center max-w-md mb-8">
+        Your Kindle clippings have been processed and organized.
         Download your zip file to access your beautifully formatted highlights.
       </p>
-      
+
       <Button
         onClick={onDownload}
         disabled={isDownloading || hasDownloaded}
