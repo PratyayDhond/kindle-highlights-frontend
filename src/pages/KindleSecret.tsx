@@ -175,7 +175,7 @@ export default function KindleSecret() {
               <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">Important Security Notice</h3>
               <ul className="text-amber-700 dark:text-amber-300 space-y-1 text-sm">
                 <li>• <strong>Keep your secret key private</strong> - Never share it with anyone</li>
-                <li>• <strong>Store securely on your Kindle</strong> - Copy to root directory as '<code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">.kindle_secret.kindle_clippings</code>' file.</li>
+                <li>• <strong>Store securely on your Kindle</strong> - Copy to '<code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">/extensions/Kindle-Clippings/kindle_secret.kindle_clippings</code>' file.</li>
                 <li>• <strong>Revoke if compromised</strong> - Delete and regenerate if you suspect unauthorized access</li>
                 <li>• <strong>Jailbroken Kindle required</strong> - This feature requires a modified Kindle device</li>
               </ul>
@@ -323,11 +323,11 @@ export default function KindleSecret() {
               </div>
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-                <p>Copy the file to your Kindle's root directory (same level as documents folder)</p>
+                <p>Copy the file to your Kindle's <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">/extensions/Kindle-Clippings/</code> directory</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                <p>Ensure the filename is exactly: <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">.kindle_secret.kindle_clippings</code></p>
+                <p>Ensure the full path is: <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">/extensions/Kindle-Clippings/kindle_secret.kindle_clippings</code></p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>

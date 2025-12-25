@@ -3,6 +3,14 @@ import { version } from "os";
 
 const whatsNewData = [
 	{
+		version: "v4.0.1",
+		date: "20251225",
+		changes: [
+			"UI changes for file location for kindle extension secret location.",
+			"Added delete uploaded highlight files, clear upload cache."
+		]
+	},
+	{
 		version: "v4.0.0",
 		date: "2025-09-24",
 		changes: [
