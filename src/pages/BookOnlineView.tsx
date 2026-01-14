@@ -27,6 +27,7 @@ export default function BookOnlineView() {
   const [showQuotes, setShowQuotes] = useState(true);
   const [isViewFilterOpen, setIsViewFilterOpen] = useState(false);
   const [strictPunctuation, setStrictPunctuation] = useState(false);
+  const [sortBy, setSortBy] = useState<"default" | "page" | "location">("default");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingHighlight, setEditingHighlight] = useState<Highlight | null>(null);
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
@@ -54,7 +55,7 @@ export default function BookOnlineView() {
   });
 
 
-  // Filter highlights
+  // Filter and sort highlights
   const filteredHighlights = book.highlights
     ? book.highlights
       .filter((hl: any) => {
@@ -72,6 +73,19 @@ export default function BookOnlineView() {
         return isActive && matchesSearch && matchesType;
       })
       .map((hl: any) => getEffectiveHighlight(hl))
+      .sort((a: any, b: any) => {
+        if (sortBy === "page") {
+          const pageA = a.page ?? Infinity;
+          const pageB = b.page ?? Infinity;
+          return pageA - pageB;
+        }
+        if (sortBy === "location") {
+          const locA = a.location?.start ?? Infinity;
+          const locB = b.location?.start ?? Infinity;
+          return locA - locB;
+        }
+        return 0; // default: keep original order
+      })
     : [];
 
   // Effects
@@ -373,26 +387,39 @@ export default function BookOnlineView() {
             </svg>
           </button>
           {isViewFilterOpen && (
-            <div className="flex gap-6 items-center mt-3 justify-center">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={showQuotes}
-                  onChange={() => setShowQuotes((v) => !v)}
-                  className="accent-royal-600"
-                />
-                <span>Enable double-quotes ("") in output</span>
-              </label>
-              <br />
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={strictPunctuation}
-                  onChange={() => setStrictPunctuation((v) => !v)}
-                  className="accent-royal-600"
-                />
-                <span>Add punctuation (.) to all quotes without one.</span>
-              </label>
+            <div className="flex flex-col gap-4 mt-3 items-center">
+              <div className="flex gap-6 items-center justify-center">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={showQuotes}
+                    onChange={() => setShowQuotes((v) => !v)}
+                    className="accent-royal-600"
+                  />
+                  <span>Enable double-quotes ("") in output</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={strictPunctuation}
+                    onChange={() => setStrictPunctuation((v) => !v)}
+                    className="accent-royal-600"
+                  />
+                  <span>Add punctuation (.) to all quotes without one.</span>
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 dark:text-muted-foreground">Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as "default" | "page" | "location")}
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-border bg-background dark:bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-royal-500"
+                >
+                  <option value="default">Default</option>
+                  <option value="page">Page Number</option>
+                  <option value="location">Location</option>
+                </select>
+              </div>
             </div>
           )}
         </div>
