@@ -3,6 +3,13 @@ import { version } from "os";
 
 const whatsNewData = [
 	{
+		version: "v4.0.3",
+		date: "20260114",
+		changes: [
+			"Added sort option in Book Online View - sort highlights by Page Number or Location."
+		]
+	},
+	{
 		version: "v4.0.2",
 		date: "20260113",
 		changes: [
