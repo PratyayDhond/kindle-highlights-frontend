@@ -3,6 +3,14 @@ import { version } from "os";
 
 const whatsNewData = [
 	{
+		version: "v4.0.2",
+		date: "20260113",
+		changes: [
+			"Backend infrastructure migrated from Render to new vendor.",
+			"Newsletter services and uploads are now working without errors."
+		]
+	},
+	{
 		version: "v4.0.1",
 		date: "20251225",
 		changes: [
