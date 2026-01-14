@@ -15,7 +15,7 @@ const whatsNewData = [
 		date: "20251225",
 		changes: [
 			"UI changes for file location for kindle extension secret location.",
-			"Added delete uploaded highlight files, clear upload cache."
+			"Added delete uploaded highlight files, clear upload cache in kindle-extensions addon for kindle devices."
 		]
 	},
 	{
