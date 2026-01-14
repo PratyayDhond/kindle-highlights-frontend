@@ -1,10 +1,11 @@
 
 const Footer = () => (
-  <footer className="w-full py-3 px-4 text-xs text-gray-500 dark:text-gray-400 bg-background dark:bg-card border-t border-border flex items-center justify-between">
-    <span>
-      Version {import.meta.env.VITE_FRONTEND_VERSION} &nbsp;|&nbsp; &copy; {new Date().getFullYear()} dhondpratyay
-    </span>
+  <footer className="w-full py-3 px-4 text-xs text-gray-500 dark:text-gray-400 bg-background dark:bg-card border-t border-border flex items-center justify-center">
     <div className="flex gap-3 items-center">
+      <span>
+        Version {import.meta.env.VITE_FRONTEND_VERSION} &nbsp;|&nbsp; &copy; {new Date().getFullYear()} <a href="https://pratyaydhond.github.io/" target="_blank" rel="noopener noreferrer" className="hover:text-royal-600 dark:hover:text-royal-400 transition underline">Pratyay Dhond</a>
+      </span>
+      |
       <a
         href="https://github.com/PratyayDhond"
         target="_blank"
