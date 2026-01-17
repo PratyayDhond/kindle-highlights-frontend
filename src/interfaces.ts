@@ -32,4 +32,23 @@ interface BooksCached {
     expiry: Date;
 }
 
-export type { Highlight, StagedOperation, Book, BooksCached };
+interface QuoteSearchResult {
+    _id: string;
+    highlight: string;
+    type: "highlight" | "note";
+    location: { start: number; end: number };
+    timestamp?: string;
+    bookTitle: string;
+    bookAuthor: string;
+    bookId: string;
+}
+
+interface QuoteSearchResponse {
+    quotes: QuoteSearchResult[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
+export type { Highlight, StagedOperation, Book, BooksCached, QuoteSearchResult, QuoteSearchResponse };
