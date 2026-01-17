@@ -3,6 +3,21 @@ import { version } from "os";
 
 const whatsNewData = [
 	{
+		version: "v4.1.0 - Global Quote Search",
+		date: "20260117",
+		changes: [
+			"Added Global Quote Search feature on Dashboard.",
+			"Search across all your highlights with a single query.",
+			"Toggle between Book Search and Quote Search modes.",
+			"Pagination support with customizable results per page (5, 10, 20, 50).",
+			"Highlighted matching text in search results.",
+			"Click on a quote to navigate directly to its book.",
+			"Backend: Database restructured - highlights moved to separate collection for efficient querying.",
+			"Backend: Added text search index for fast fuzzy search across highlights.",
+			"Backend: Implemented soft-delete with cascade for books and highlights."
+		]
+	},
+	{
 		version: "v4.0.3",
 		date: "20260114",
 		changes: [

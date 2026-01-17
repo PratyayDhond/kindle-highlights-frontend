@@ -12,7 +12,9 @@ import { useStats } from "@/context/StatsContext";
 import { useToast } from '@/hooks/use-toast';
 import RefreshButton from "@/components/RefreshButton";
 import { useUser } from "@/context/UserContext";
-import { Book } from "@/interfaces";
+import { Book, QuoteSearchResult } from "@/interfaces";
+import SearchToggle, { SearchMode } from "@/components/SearchToggle";
+import QuoteSearch from "@/components/QuoteSearch";
 
 const dashboard_cache_configurations = [
   {
@@ -53,6 +55,7 @@ export default function Dashboard() {
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
   const [search, setSearch] = useState("");
   const [isUploading, setIsUploading] = useState(false); // <-- Add this state
+  const [searchMode, setSearchMode] = useState<SearchMode>("book");
   const navigate = useNavigate();
   const { toast: toastSonner } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -385,6 +388,36 @@ export default function Dashboard() {
     }
   };
 
+  // Handle clicking a quote in QuoteSearch - navigate to the book
+  const handleQuoteClick = async (quote: QuoteSearchResult) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/book/${encodeURIComponent(quote.bookId)}`,
+        {
+          credentials: "include",
+          method: "GET",
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch book data");
+      const data = await response.json();
+
+      data.book.highlights.sort((a: any, b: any) => {
+        if (a.location.start !== b.location.start) {
+          return a.location.start - b.location.start;
+        }
+        if (a.type !== b.type) {
+          return a.type.localeCompare(b.type);
+        }
+        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+      });
+
+      // Navigate to /book/:bookId and pass book data as state
+      navigate(`/book/${quote.bookId}`, { state: { book: data.book as Book } });
+    } catch (err) {
+      toast.error("Failed to open book.");
+    }
+  };
+
   // Filter books by title or author (case-insensitive)
   const filteredBooks = books.filter(
     (book) =>
@@ -500,15 +533,23 @@ export default function Dashboard() {
             ${isDesktop ? "ml-64 mr-16" : ""}
           `}
         >
-          <h1 className="text-3xl font-bold mb-8 text-center text-royal-700 dark:text-royal-400">Dashboard</h1>
-          <GlobalSearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Search books by title or author..."
-            className="max-w-md w-full mb-8"
-            inputRef={searchInputRef} // Pass the ref to the search bar
+          <h1 className="text-3xl font-bold mb-4 text-center text-royal-700 dark:text-royal-400">Dashboard</h1>
+          <SearchToggle
+            mode={searchMode}
+            onModeChange={setSearchMode}
+            className="mb-6"
           />
-          <div className="w-full flex justify-center">
+          
+          {searchMode === "book" ? (
+            <>
+              <GlobalSearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search books by title or author..."
+                className="max-w-md w-full mb-8"
+                inputRef={searchInputRef} // Pass the ref to the search bar
+              />
+              <div className="w-full flex justify-center">
             {filteredBooks.length === 0 ? (
               <div className="text-gray-400 text-lg text-center py-20">
                 Your kindle highlights will appear here after uploading 'My Clippings.txt' file.
@@ -551,7 +592,14 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </div>
+              </div>
+            </>
+          ) : (
+            <QuoteSearch
+              className="max-w-4xl w-full"
+              onQuoteClick={handleQuoteClick}
+            />
+          )}
         </main>
       </div>
     </div>
