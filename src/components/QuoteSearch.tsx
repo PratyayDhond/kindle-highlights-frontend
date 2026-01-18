@@ -256,9 +256,9 @@ const QuoteSearch: React.FC<QuoteSearchProps> = ({ className = "", onQuoteClick 
                     </p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <BookOpen className="w-4 h-4" />
-                      <span className="font-medium truncate">{quote.bookTitle}</span>
+                      <span className="font-medium max-w-[7em] truncate">{quote.bookTitle}{quote.bookTitle.length > 20 ? '..' : ''}</span>
                       <span className="text-gray-400">•</span>
-                      <span className="truncate">{quote.bookAuthor}</span>
+                      <span className="max-w-[7em] truncate">{quote.bookAuthor}{quote.bookAuthor.length > 20 ? '..' : ''}</span>
                     </div>
                   </div>
                 </div>
