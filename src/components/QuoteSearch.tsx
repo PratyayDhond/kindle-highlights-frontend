@@ -1,4 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
+// ...existing code...
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Search, BookOpen, Quote } from "lucide-react";
 import { QuoteSearchResult, QuoteSearchResponse } from "@/interfaces";
 import {
@@ -37,6 +39,7 @@ const QuoteSearch: React.FC<QuoteSearchProps> = ({ className = "", onQuoteClick 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const totalPages = Math.ceil(total / limit);
+  const isMobile = useIsMobile();
 
   const fetchQuotes = useCallback(async (query: string, page: number, pageLimit: number) => {
     if (!query.trim()) {
@@ -267,44 +270,33 @@ const QuoteSearch: React.FC<QuoteSearchProps> = ({ className = "", onQuoteClick 
               <Pagination className="mt-6">
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
+                    <button
+                      aria-label="Go to previous page"
                       onClick={(e) => {
                         e.preventDefault();
                         if (currentPage > 1) handlePageChange(currentPage - 1);
                       }}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                      className={`flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 dark:border-border bg-background hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}`}
+                    >
+                      <span className="sr-only">Previous</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
                   </PaginationItem>
-                  {getPaginationNumbers().map((page, index) =>
-                    page === "ellipsis" ? (
-                      <PaginationItem key={`ellipsis-${index}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          isActive={currentPage === page}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(page);
-                          }}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )
-                  )}
                   <PaginationItem>
-                    <PaginationNext
-                      href="#"
+                    <span className="px-2 text-base font-medium select-none">{currentPage} / {totalPages}</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <button
+                      aria-label="Go to next page"
                       onClick={(e) => {
                         e.preventDefault();
                         if (currentPage < totalPages) handlePageChange(currentPage + 1);
                       }}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                      className={`flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 dark:border-border bg-background hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}`}
+                    >
+                      <span className="sr-only">Next</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
