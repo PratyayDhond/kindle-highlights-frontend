@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import RefreshButton from "@/components/RefreshButton";
 import { useUser } from "@/context/UserContext";
 import { Book, QuoteSearchResult } from "@/interfaces";
+import AddYourQuote from "@/components/AddYourQuote";
 import SearchToggle, { SearchMode } from "@/components/SearchToggle";
 import QuoteSearch from "@/components/QuoteSearch";
 
@@ -49,9 +50,12 @@ async function calculateFileHash(file: File): Promise<string> {
 }
 
 export default function Dashboard() {
+
+
   const [books, setBooks] = useState<Book[]>([]);
   const [lastFile, setLastFile] = useState<File | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Sidebar open by default on desktop, closed on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : false);
   const [isDesktop, setIsDesktop] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
   const [search, setSearch] = useState("");
   const [isUploading, setIsUploading] = useState(false); // <-- Add this state
@@ -60,10 +64,37 @@ export default function Dashboard() {
   const { toast: toastSonner } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { user } = useUser(); // <-- get user from context
-
   // Use CoinsContext for coins state
   const { coins, setCoins } = useCoins();
   const { stats, setStats } = useStats();
+
+  // Handler for when a quote is added via AddYourQuote
+  function handleQuoteAdded(highlight: any) {
+    if (!user || !user.id) return;
+    const specialBookTitle = user && user.name ? `${user.name} Added Quotes` : "Added Quotes";
+    const specialBookIdx = books.findIndex(b => b.title === specialBookTitle);
+    if (specialBookIdx !== -1) {
+      const updatedBooks = [...books];
+      updatedBooks[specialBookIdx] = {
+        ...updatedBooks[specialBookIdx],
+        highlights: [highlight, ...(updatedBooks[specialBookIdx].highlights || [])]
+      };
+      setBooks(updatedBooks);
+      localStorage.setItem(user.id + "_dashboard_books", JSON.stringify(updatedBooks));
+    } else {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/user/books`, {
+        credentials: "include",
+      })
+        .then(response => response.ok ? response.json() : Promise.reject("Failed to fetch books"))
+        .then(data => {
+          setBooks(data.books || []);
+          if (data.books && Array.isArray(data.books)) {
+            localStorage.setItem(user.id + "_dashboard_books", JSON.stringify(data.books));
+          }
+        })
+        .catch(() => {});
+    }
+  }
 
   // Fetch stats from backend when books change or on mount
   useEffect(() => {
@@ -468,6 +499,9 @@ export default function Dashboard() {
 
   };
 
+  // Special book title for this user
+  const specialBookTitle = user && user.name ? `${user.name} Added Quotes` : "Added Quotes";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-royal-100/30 to-royal-200/30 dark:from-background dark:via-royal-900/10 dark:to-royal-900/10 relative flex flex-col">
       {/* Header with Refresh button and Coins dashboard */}
@@ -480,10 +514,18 @@ export default function Dashboard() {
             size="md"
             position="left"
             showLabel={true}
-            className="mr-4"
+            className="mr-2"
           />
+          {/* AddYourQuote icon button on desktop, hidden on mobile */}
+          {isDesktop && (
+            <AddYourQuote
+              placement="inline"
+              iconOnly={true}
+              triggerClassName="inline-flex items-center justify-center bg-royal-600 hover:bg-royal-700 text-white rounded-full p-2 shadow mr-2"
+              onQuoteAdded={handleQuoteAdded}
+            />
+          )}
         </div>
-
         <CoinsDashboard coins={typeof coins === "number" && !isNaN(coins) ? coins : 0} />
       </div>
 
@@ -500,14 +542,14 @@ export default function Dashboard() {
 
       <div className="flex flex-1 w-full flex-col md:flex-row">
         {/* Sidebar: fixed on desktop, full width on mobile */}
+        {/* Hide upload/stats sidebar by default on mobile */}
         {((sidebarOpen && !isDesktop) || isDesktop) && (
           <aside
-            className={`
-              ${isDesktop
+            className={
+              isDesktop
                 ? "fixed left-0 top-0 h-full w-64 min-w-[16rem] border-r border-royal-100 dark:border-royal-800 z-30 bg-background/80 dark:bg-card/80 flex flex-col p-6 gap-8"
-                : "w-full z-30 bg-background/80 dark:bg-card/80 flex flex-col p-6 gap-8 top-0 left-0"}
-              transition-transform duration-300
-            `}
+                : "w-full z-30 bg-background/80 dark:bg-card/80 flex flex-col p-6 gap-8 top-0 left-0"
+            }
             style={
               isDesktop
                 ? { boxShadow: "2px 0 8px 0 rgba(0,0,0,0.03)", marginTop: "4.5rem" }
@@ -533,6 +575,17 @@ export default function Dashboard() {
             ${isDesktop ? "ml-64 mr-16" : ""}
           `}
         >
+          {/* AddYourQuote floating action button on mobile only */}
+          {!isDesktop && (
+            <div className="fixed bottom-12 right-10 z-50">
+              <AddYourQuote
+                placement="fab"
+                iconOnly={false}
+                triggerClassName="bg-royal-600 hover:bg-royal-700 text-white rounded-full shadow-lg p-4 flex items-center justify-center transition-all"
+                onQuoteAdded={handleQuoteAdded}
+              />
+            </div>
+          )}
           <h1 className="text-3xl font-bold mb-4 text-center text-royal-700 dark:text-royal-400">Dashboard</h1>
           <SearchToggle
             mode={searchMode}

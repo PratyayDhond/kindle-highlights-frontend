@@ -8,16 +8,22 @@ import HighlightDisplay from "@/components/HighlightDisplay";
 import { useStagingArea } from "@/hooks/useStagingArea";
 import { toast } from "sonner";
 import { Book, Highlight } from "@/interfaces";
+import AddYourQuote from "@/components/AddYourQuote";
+import { useUser } from "@/context/UserContext";
 import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { getScrollPositionFromLocalCache, setScrollPositionToLocalCache } from "@/utils/scrollPositionHelpers";
 
 export default function BookOnlineView() {
+  const { user } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(location.state?.book || null);
 
   // Early return if no book
   if (!book) return <div className="text-center mt-10 text-red-500">No book data found.</div>;
+
+  // Special book title for this user
+  const specialBookTitle = user && user.name ? `${user.name} Added Quotes` : "Added Quotes";
 
   // State
   const [search, setSearch] = useState("");
@@ -329,6 +335,26 @@ export default function BookOnlineView() {
         )}
 
         {/* Book Title and Search */}
+        {/* Show AddYourQuote only for the special book */}
+        {book.title === specialBookTitle && (
+          <div
+            className="fixed bottom-12 right-10 z-50"
+          >
+            <AddYourQuote
+              placement="fab"
+              iconOnly={false}
+              triggerClassName="bg-royal-600 hover:bg-royal-700 text-white rounded-full shadow-lg p-4 flex items-center justify-center transition-all"
+              onQuoteAdded={(highlight) => {
+                if (highlight && book) {
+                  setBook({
+                    ...book,
+                    highlights: [highlight, ...(book.highlights || [])]
+                  });
+                }
+              }}
+            />
+          </div>
+        )}
         <h1 className="text-3xl font-bold text-royal-700 dark:text-royal-400 mb-2 text-center">{book.title}</h1>
         <h2 className="text-lg text-gray-600 dark:text-muted-foreground mb-8 text-center">by {book.author}</h2>
 

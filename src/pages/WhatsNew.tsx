@@ -3,6 +3,19 @@ import { version } from "os";
 
 const whatsNewData = [
 	{
+		version: "v4.2.0 - Add Your Quote & UI Improvements",
+		date: "20260126",
+		changes: [
+			"Users can now add their own quotes from anywhere using the new 'Add Quote' button (FAB) on Dashboard and in the special 'Added Quotes' book.",
+			"A special book titled '<username> Added Quotes' is created automatically for user-added quotes.",
+			"Quotes added from BookOnlineView update the current book view instantly without reload.",
+			"FAB (Add Quote) button is now always bottom right on Android/mobile for both Dashboard and BookOnlineView.",
+			"Improved Add Quote modal styling and mobile responsiveness.",
+			"UI bug fixes for modal width and FAB placement on mobile.",
+			"Dashboard and BookOnlineView now keep the special book and its highlights in sync after adding a quote.",
+		]
+	},
+	{
 		version: "v4.1.0 - Global Quote Search",
 		date: "20260117",
 		changes: [
