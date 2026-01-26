@@ -1,7 +1,0 @@
-{
-  "name": "kindle-clippings",
-  "compatibility_date": "2025-06-05",
-  "assets": {
-    "directory": "./dist"
-  }
-}
