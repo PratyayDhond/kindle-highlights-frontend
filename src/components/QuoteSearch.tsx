@@ -1,8 +1,9 @@
 import React, { useState, useRef, useCallback } from "react";
 // ...existing code...
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Search, BookOpen, Quote } from "lucide-react";
+import { Search, BookOpen, Quote, Copy, Check } from "lucide-react";
 import { QuoteSearchResult, QuoteSearchResponse } from "@/interfaces";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ const QuoteSearch: React.FC<QuoteSearchProps> = ({ className = "", onQuoteClick 
   const [limit, setLimit] = useState<number>(5);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [copiedQuoteId, setCopiedQuoteId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const totalPages = Math.ceil(total / limit);
@@ -116,6 +118,17 @@ const QuoteSearch: React.FC<QuoteSearchProps> = ({ className = "", onQuoteClick 
       if (submittedQuery.trim()) {
         fetchQuotes(submittedQuery, page, limit);
       }
+    }
+  };
+
+  const handleCopyQuote = async (quote: QuoteSearchResult) => {
+    try {
+      await navigator.clipboard.writeText(quote.highlight);
+      setCopiedQuoteId(quote._id);
+      toast.success("Quote copied to clipboard");
+      window.setTimeout(() => setCopiedQuoteId(null), 1500);
+    } catch {
+      toast.error("Could not copy quote to clipboard");
     }
   };
 
@@ -251,9 +264,27 @@ const QuoteSearch: React.FC<QuoteSearchProps> = ({ className = "", onQuoteClick 
                 <div className="flex items-start gap-3">
                   <Quote className="w-5 h-5 text-royal-400 mt-1 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-gray-700 dark:text-foreground mb-2 leading-relaxed">
-                      {highlightMatch(quote.highlight, submittedQuery)}
-                    </p>
+                    <div className="flex items-start gap-2">
+                      <p className="text-gray-700 dark:text-foreground mb-2 leading-relaxed flex-1">
+                        {highlightMatch(quote.highlight, submittedQuery)}
+                      </p>
+                      <button
+                        type="button"
+                        aria-label={copiedQuoteId === quote._id ? "Quote copied" : "Copy quote"}
+                        title={copiedQuoteId === quote._id ? "Quote copied" : "Copy quote"}
+                        className="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex-shrink-0"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleCopyQuote(quote);
+                        }}
+                      >
+                        {copiedQuoteId === quote._id ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <BookOpen className="w-4 h-4" />
                       <span className="font-medium max-w-[7em] truncate">{quote.bookTitle}{quote.bookTitle.length > 20 ? '..' : ''}</span>

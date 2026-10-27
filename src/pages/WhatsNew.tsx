@@ -11,7 +11,6 @@ const whatsNewData = [
 			"Quotes added from BookOnlineView update the current book view instantly without reload.",
 			"FAB (Add Quote) button is now always bottom right on Android/mobile for both Dashboard and BookOnlineView.",
 			"Improved Add Quote modal styling and mobile responsiveness.",
-			"UI bug fixes for modal width and FAB placement on mobile.",
 			"Dashboard and BookOnlineView now keep the special book and its highlights in sync after adding a quote.",
 		]
 	},
